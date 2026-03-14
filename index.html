@@ -6,357 +6,139 @@
   <title>One World 2026 – Film Explorer</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0d0d14;
-      --card: #15151f;
-      --border: #252535;
-      --accent: #e63946;
-      --accent2: #457b9d;
-      --text: #e0e0e0;
-      --muted: #888;
-      --tag: #1d2d44;
+      --bg: #0d0d14; --card: #15151f; --border: #252535;
+      --accent: #e63946; --accent2: #457b9d; --text: #e0e0e0; --muted: #666;
     }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+    /* ── Header ── */
+    header { background: linear-gradient(135deg,#1a0a0a,#0d0d14); border-bottom:1px solid var(--border); padding:.9rem 1.2rem; position:sticky; top:0; z-index:200; }
+    .header-top { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.7rem; }
+    .logo-main { font-size:1.3rem; font-weight:800; color:var(--accent); white-space:nowrap; }
+    .logo-sub { font-size:.72rem; color:var(--muted); }
+    .filters { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+    .filters input, .filters select {
+      background:var(--card); border:1px solid var(--border); color:var(--text);
+      padding:.38rem .7rem; border-radius:7px; font-size:.83rem; outline:none;
     }
+    .filters input { min-width:180px; flex:1; }
+    .filters input:focus, .filters select:focus { border-color:var(--accent2); }
+    .count { color:var(--muted); font-size:.8rem; margin-left:auto; white-space:nowrap; }
+    .view-toggle { display:flex; gap:.3rem; margin-left:auto; }
+    .view-btn { padding:.35rem .8rem; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--muted); cursor:pointer; font-size:.8rem; font-weight:600; }
+    .view-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
-    header {
-      background: linear-gradient(135deg, #1a0a0a 0%, #0d0d14 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+    /* ── List view ── */
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1rem; padding:1.2rem; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:11px; overflow:hidden; cursor:pointer; transition:transform .18s,border-color .18s,box-shadow .18s; }
+    .card:hover { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 8px 24px rgba(230,57,70,.15); }
+    .card-img { width:100%; aspect-ratio:16/9; object-fit:cover; background:#1a1a2e; display:block; }
+    .card-ph { width:100%; aspect-ratio:16/9; background:linear-gradient(135deg,#1a1a2e,#15151f); display:flex; align-items:center; justify-content:center; font-size:2.2rem; }
+    .card-body { padding:.85rem; display:flex; flex-direction:column; gap:.4rem; }
+    .card-type { font-size:.68rem; color:var(--accent2); text-transform:uppercase; letter-spacing:.07em; font-weight:700; }
+    .card-title { font-size:.95rem; font-weight:700; color:#fff; line-height:1.3; }
+    .card-desc { font-size:.78rem; color:var(--muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .card-screenings { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.3rem; }
+    .screening-chip { font-size:.68rem; padding:.15rem .45rem; border-radius:4px; color:#fff; font-weight:600; white-space:nowrap; }
+    .card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.4rem; }
+    .visit-link { font-size:.72rem; color:var(--accent); text-decoration:none; font-weight:600; }
+    .visit-link:hover { text-decoration:underline; }
 
-    .logo {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-    .logo-main { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
-    .logo-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: .05em; }
+    /* ── Calendar view ── */
+    .calendar-wrap { padding:1rem 1.2rem; overflow-x:auto; }
+    .cal-table { border-collapse:collapse; min-width:900px; width:100%; }
+    .cal-table th { background:#1a1a2e; padding:.5rem .7rem; font-size:.75rem; font-weight:700; text-align:left; color:#aaa; border:1px solid var(--border); white-space:nowrap; }
+    .cal-table td { border:1px solid var(--border); padding:0; vertical-align:top; width:calc(100%/9); min-width:110px; background:var(--bg); }
+    .cal-cell { padding:.4rem; min-height:60px; }
+    .cal-event { margin-bottom:.3rem; border-radius:5px; padding:.3rem .45rem; font-size:.72rem; cursor:pointer; transition:opacity .15s; border:none; text-align:left; width:100%; }
+    .cal-event:hover { opacity:.8; }
+    .cal-event-title { font-weight:700; color:#fff; line-height:1.2; margin-bottom:.15rem; }
+    .cal-event-time { color:rgba(255,255,255,.7); font-size:.65rem; }
+    .cal-venue-label { font-size:.65rem; padding:.2rem .4rem; border-radius:3px; display:inline-block; margin-bottom:.3rem; font-weight:700; }
 
-    .controls {
-      display: flex;
-      gap: 0.6rem;
-      flex: 1;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+    /* ── Modal ── */
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:1000; align-items:center; justify-content:center; padding:1rem; }
+    .modal-backdrop.open { display:flex; }
+    .modal-wrap { position:relative; max-width:700px; width:100%; }
+    .modal { background:var(--card); border:1px solid var(--border); border-radius:14px; max-height:90vh; overflow-y:auto; }
+    .modal-img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:14px 14px 0 0; }
+    .modal-body { padding:1.3rem; }
+    .modal-type { font-size:.72rem; color:var(--accent2); text-transform:uppercase; letter-spacing:.07em; font-weight:700; margin-bottom:.4rem; }
+    .modal-title { font-size:1.5rem; font-weight:800; color:#fff; margin-bottom:.8rem; line-height:1.2; }
+    .modal-desc { color:#bbb; line-height:1.7; font-size:.92rem; margin-bottom:1.2rem; }
+    .modal-screenings-title { font-size:.8rem; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.5rem; }
+    .modal-screenings { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1.2rem; }
+    .modal-screening { display:flex; align-items:center; gap:.6rem; padding:.45rem .7rem; border-radius:7px; text-decoration:none; }
+    .modal-screening:hover { opacity:.85; }
+    .modal-screening-venue { font-weight:700; color:#fff; font-size:.85rem; flex:1; }
+    .modal-screening-when { color:rgba(255,255,255,.7); font-size:.78rem; white-space:nowrap; }
+    .modal-screening-buy { font-size:.72rem; background:rgba(255,255,255,.15); color:#fff; padding:.15rem .4rem; border-radius:4px; white-space:nowrap; }
+    .modal-actions { display:flex; gap:.7rem; }
+    .btn { padding:.55rem 1.1rem; border-radius:7px; font-size:.88rem; font-weight:700; cursor:pointer; text-decoration:none; border:none; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-secondary { background:#1d2d44; color:var(--text); }
+    .close-btn { position:absolute; top:.7rem; right:.7rem; background:rgba(0,0,0,.6); border:none; color:#fff; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+    .empty { grid-column:1/-1; text-align:center; padding:4rem; color:var(--muted); font-size:1rem; }
+    @media(max-width:600px) { .grid { grid-template-columns:1fr; } }
 
-    input[type=text] {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.45rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      flex: 1;
-      min-width: 160px;
-      outline: none;
-      transition: border-color .2s;
-    }
-    input[type=text]:focus { border-color: var(--accent2); }
-    input[type=text]::placeholder { color: var(--muted); }
-
-    select {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.45rem 0.7rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .count {
-      color: var(--muted);
-      font-size: 0.85rem;
-      white-space: nowrap;
-      margin-left: auto;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.2rem;
-      padding: 1.5rem;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      transition: transform .2s, border-color .2s, box-shadow .2s;
-      text-decoration: none;
-      color: inherit;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
-      box-shadow: 0 8px 24px rgba(230,57,70,.15);
-    }
-
-    .card-img {
-      width: 100%;
-      aspect-ratio: 16/9;
-      object-fit: cover;
-      background: #1a1a2e;
-    }
-    .card-img-placeholder {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: linear-gradient(135deg, #1a1a2e 0%, #15151f 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-    }
-
-    .card-body {
-      padding: 1rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .card-type {
-      font-size: 0.7rem;
-      color: var(--accent2);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-weight: 600;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      line-height: 1.3;
-      color: #fff;
-    }
-
-    .card-desc {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.5;
-      flex: 1;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 0.5rem;
-    }
-
-    .type-badge {
-      font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: var(--tag);
-      color: var(--accent2);
-      font-weight: 600;
-    }
-
-    .visit-link {
-      font-size: 0.75rem;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .visit-link:hover { text-decoration: underline; }
-
-    .empty {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 4rem;
-      color: var(--muted);
-      font-size: 1.1rem;
-    }
-
-    /* Modal */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.8);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .modal-backdrop.open { display: flex; }
-
-    .modal {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      max-width: 680px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-img {
-      width: 100%;
-      aspect-ratio: 16/9;
-      object-fit: cover;
-      border-radius: 16px 16px 0 0;
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-    }
-
-    .modal-type {
-      font-size: 0.75rem;
-      color: var(--accent2);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-
-    .modal-title {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 1rem;
-      line-height: 1.2;
-    }
-
-    .modal-desc {
-      color: #bbb;
-      line-height: 1.7;
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 0.8rem;
-    }
-
-    .btn {
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      border: none;
-      transition: opacity .2s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-secondary { background: var(--tag); color: var(--text); }
-
-    .close-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: rgba(0,0,0,.5);
-      border: none;
-      color: #fff;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-wrapper {
-      position: relative;
-    }
-
-    .filter-tags {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      padding: 0 1.5rem 0.8rem;
-    }
-
-    .filter-tag {
-      padding: 0.3rem 0.7rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      background: var(--card);
-      transition: all .15s;
-    }
-    .filter-tag:hover, .filter-tag.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-    .filter-tag.vr { }
-    .filter-tag.feature { }
-
-    @media (max-width: 600px) {
-      .grid { grid-template-columns: 1fr; }
-      .modal-title { font-size: 1.3rem; }
-    }
+    .venue-legend { display:flex; flex-wrap:wrap; gap:.4rem; padding:.5rem 1.2rem; }
+    .legend-item { display:flex; align-items:center; gap:.3rem; font-size:.72rem; color:#aaa; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">
-    <span class="logo-main">🎬 One World 2026</span>
-    <span class="logo-sub">International Human Rights Film Festival · 11–19 March · Prague</span>
+  <div class="header-top">
+    <div>
+      <div class="logo-main">🎬 One World 2026</div>
+      <div class="logo-sub">Human Rights Film Festival · 11–19 March · Prague</div>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btnList" onclick="setView('list')">☰ List</button>
+      <button class="view-btn" id="btnCal" onclick="setView('calendar')">📅 Calendar</button>
+    </div>
   </div>
-  <div class="controls">
+  <div class="filters">
     <input type="text" id="search" placeholder="Search films…" oninput="render()">
     <select id="typeFilter" onchange="render()">
       <option value="">All types</option>
       <option value="Full-length documentary">Documentary</option>
       <option value="Feature film">Feature film</option>
       <option value="Short documentary">Short</option>
-      <option value="Virtual reality">Virtual Reality</option>
+      <option value="Virtual reality">VR</option>
+    </select>
+    <select id="venueFilter" onchange="render()">
+      <option value="">All venues</option>
     </select>
     <span class="count" id="count"></span>
   </div>
 </header>
 
-<div class="filter-tags" id="tagStrip"></div>
+<div id="listView">
+  <div class="grid" id="grid"></div>
+</div>
 
-<div class="grid" id="grid"></div>
+<div id="calView" style="display:none">
+  <div class="venue-legend" id="venueLegend"></div>
+  <div class="calendar-wrap">
+    <table class="cal-table" id="calTable"></table>
+  </div>
+</div>
 
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
-  <div class="modal-wrapper">
+  <div class="modal-wrap">
     <div class="modal" id="modal">
-      <img class="modal-img" id="modalImg" src="" alt="">
+      <img class="modal-img" id="modalImg" src="" alt="" style="display:none">
       <div class="modal-body">
         <div class="modal-type" id="modalType"></div>
         <div class="modal-title" id="modalTitle"></div>
         <div class="modal-desc" id="modalDesc"></div>
+        <div class="modal-screenings-title" id="modalScreenTitle" style="display:none">Screenings</div>
+        <div class="modal-screenings" id="modalScreenings"></div>
         <div class="modal-actions">
-          <a class="btn btn-primary" id="modalLink" href="#" target="_blank">View on One World →</a>
+          <a class="btn btn-primary" id="modalLink" href="#" target="_blank">oneworld.cz →</a>
           <button class="btn btn-secondary" onclick="closeModal()">Close</button>
         </div>
       </div>
@@ -367,99 +149,226 @@
 
 <script>
 const FILMS = [{"type": "Full-length documentary", "title": "2000 Meters to Andriivka", "link": "https://www.oneworld.cz/films/57974-2000-meters-to-andriivka", "desc": "The small Ukrainian village of Andriivka, destroyed by Russian aggression, represents a crucial strategic point. A Ukrainian military unit is tasked with a single mission: to reclaim an occupied targe", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20040"}, {"type": "Full-length documentary", "title": "32 Meters", "link": "https://www.oneworld.cz/films/59399-32-meters", "desc": "A humorous look into the heart of a Turkish village, where a group of women decide to challenge traditional social roles in an imaginative way. They do so with due wit and stubbornness.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20041"}, {"type": "Virtual reality", "title": "8 Billion Selves", "link": "https://www.oneworld.cz/films/59680-8-billion-selves", "desc": "Is it possible to attain uniqueness among eight billion others? 8 Billion Selves is a flowing, dreamlike journey through a world where people “are born, work, wage war, love, dance, create art, and di", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20042"}, {"type": "Full-length documentary", "title": "80 Angry Journalists", "link": "https://www.oneworld.cz/films/59666-80-angry-journalists", "desc": "The Hungarian government succeeded in taking control of one of the country’s most prominent independent media outlets, Index.hu. The journalists fight back with every tool at their disposal, but the s", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20195"}, {"type": "Full-length documentary", "title": "9-Month Contract", "link": "https://www.oneworld.cz/films/57975-9-month-contract", "desc": "Surrogacy in Georgia exists in a legal gray zone, yet for young single mother Zhana, it seems like the only way to provide herself and her daughter Elena with a dignified life, education, and a future", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20044"}, {"type": "Full-length documentary", "title": "A Fox Under a Pink Moon", "link": "https://www.oneworld.cz/films/59559-a-fox-under-a-pink-moon", "desc": "Millions of Afghan men and women live in Iran without permanent legal status or protection. Sixteen-year-old Soraya suffers domestic abuse as well as the inability to freely decide her own future.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20078"}, {"type": "Full-length documentary", "title": "A Free Daughter of Free Kyrgyzstan", "link": "https://www.oneworld.cz/films/58528-a-free-daughter-of-free-kyrgyzstan", "desc": "Zere is a rebel, stirring the stagnant waters of Kyrgyz patriarchy. Through her music and public performances, she exposes the alarming state of girls’ and women’s rights in a country where they are e", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20045"}, {"type": "Full-length documentary", "title": "Action Item", "link": "https://www.oneworld.cz/films/58850-action-item", "desc": "Fatigue as the norm, performance as an obligation. Burnout is becoming a hidden yet widespread experience for people living under constant pressure and the expectation of uninterrupted online and prof", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20046"}, {"type": "Short documentary", "title": "Alex – Everyone is Special", "link": "https://www.oneworld.cz/films/59644-alex-everyone-is-special", "desc": "Alex is a happy, twelve-year old boy with autism who loves school and his friends. This year, he has set himself a challenging new goal: to learn how to ride a bike.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20198"}, {"type": "Feature film", "title": "Allah Is Not Obliged", "link": "https://www.oneworld.cz/films/58285-allah-is-not-obliged", "desc": "Birahim is only ten years old, yet he must embark on a journey across West Africa, an area plagued by armed conflict. His search for relatives leads him through bands of child soldiers where compassio", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20048"}, {"type": "Full-length documentary", "title": "AMOOSED: a moose odyssey", "link": "https://www.oneworld.cz/films/59383-amoosed-a-moose-odyssey", "desc": "Moose have played a vital and, to this day, somewhat mysterious role in our world since time immemorial. Their massive figures reflect considerable strength, a calm beauty, and the forgotten bond betw", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20193"}, {"type": "Virtual reality", "title": "Another Place", "link": "https://www.oneworld.cz/films/58640-another-place", "desc": "A young trans woman awaits asylum in France, wandering the city at night in a state of unease. Will she ever return home to her cats?", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20050"}, {"type": "Special", "title": "Awarded Film: International Competition", "link": "https://www.oneworld.cz/films/59681-awarded-film-international-competition", "desc": "", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID="}, {"type": "Full-length documentary", "title": "Better Go Mad in the Wild", "link": "https://www.oneworld.cz/films/58487-better-go-mad-in-the-wild", "desc": "Is it possible to escape the modern world and survive solely in the company of one’s brother, a few pets, and one’s own imagination? An intimate look at the magical coexistence of modern-day hermits i", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20051"}, {"type": "Full-length documentary", "title": "Carmela and the Walkers", "link": "https://www.oneworld.cz/films/58696-carmela-and-the-walkers", "desc": "Carmela helps thousands of Venezuelan refugees, bravely doing so often at great personal cost. This black-and-white documentary shows how exhausting it can be to do good while trying to keep your own ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20052"}, {"type": "Full-length documentary", "title": "Coexistence, My Ass!", "link": "https://www.oneworld.cz/films/57984-coexistence-my-ass", "desc": "Comedienne Noam Shuster-Eliassi takes up the fight against prejudice towards the Palestinian people. Her weapons are a microphone, courage, and humour. But can an Israeli celebrity change her own soci", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20053"}, {"type": "Full-length documentary", "title": "Cuba&Alaska", "link": "https://www.oneworld.cz/films/58526-cuba-alaska", "desc": "Kuba and Alaska enlist as paramedics on the front lines near Kharkiv, Ukraine, where the brutality of war tests them daily. Humor and friendship keep their faith in victory alive amid the chaos.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20056"}, {"type": "Full-length documentary", "title": "Cutting Through Rocks", "link": "https://www.oneworld.cz/films/58068-cutting-through-rocks", "desc": "Sara lives in an Iranian village, where she becomes the first woman elected to the local council. Charismatic and determined, she carves a path through a conservative society on her motorcycle, fighti", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20187"}, {"type": "Full-length documentary", "title": "Dangerous Games: Roblox and the Metaverse Exposed", "link": "https://www.oneworld.cz/films/59677-dangerous-games-roblox-and-the-metaverse-exposed", "desc": "The gaming platform Roblox is a digital world primarily designed for children. But beneath its playful surface lie extremism, racism, and sexual predators. Three teenage girls take it upon themselves ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20058"}, {"type": "Feature film", "title": "Deaf", "link": "https://www.oneworld.cz/films/58228-deaf", "desc": "Ángela is expecting a baby, but her genuine excitement is tinged with worry. How will she navigate motherhood in a world that cannot hear her? This exceptionally sensitive drama explores partnership a", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20190"}, {"type": "Full-length documentary", "title": "Dear Tomorrow", "link": "https://www.oneworld.cz/films/58069-dear-tomorrow", "desc": "Japan has recently become a hot tourist destination—a place everyone wants to be. But behind the neon lights of its big cities lies a major loneliness epidemic.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20189"}, {"type": "Full-length documentary", "title": "Death of Death", "link": "https://www.oneworld.cz/films/59480-death-of-death", "desc": "A futuristic journey in pursuit of immortality that explores the thrilling and unsettling boundaries of human existence.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20062"}, {"type": "Full-length documentary", "title": "Desert Passages", "link": "https://www.oneworld.cz/films/59603-desert-passages", "desc": "The Colorado River is drying up. Once a lifeline linking the southwestern United States and Mexico, it is now a witness to shifting ecosystems, changing ways of life, and the widening inequalities of ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20063"}, {"type": "Full-length documentary", "title": "Devi", "link": "https://www.oneworld.cz/films/59343-devi", "desc": "Once at the forefront of the fight for equality and justice, her voice has now become inconvenient for the regime. Nepali politician Devi Khadku is one of thousands of women who were subjected to viol", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20064"}, {"type": "Short documentary", "title": "Don't Blow It Up", "link": "https://www.oneworld.cz/films/59674-don-t-blow-it-up", "desc": "Two little girls are playing together with a balloon. After a small disagreement, the friends get angry at each other. Eventually their anger swells so much they become floating balloons themselves.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20065"}, {"type": "Full-length documentary", "title": "Driving Europe", "link": "https://www.oneworld.cz/films/58677-driving-europe", "desc": "In 2023, a massive strike by lorry drivers took place in Germany. Their goal was to demand proper pay and justice, as their working conditions could be compared to modern-day slavery.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20066"}, {"type": "Short documentary", "title": "Ela – Can Jump", "link": "https://www.oneworld.cz/films/59635-ela-can-jump", "desc": "“Doing a standing somersault is super cool,” says twelve-year-old Ela, who trains intensively every day to achieve her goal.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20067"}, {"type": "Full-length documentary", "title": "Elon Musk Unveiled - The Tesla Experiment", "link": "https://www.oneworld.cz/films/59300-elon-musk-unveiled-the-tesla-experiment", "desc": "Are Tesla cars really that safe? Their fully autonomous, self-driving systems have already caused a number of serious accidents in the U.S., and the company is currently under investigation by various", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20191"}, {"type": "Full-length documentary", "title": "Endless Cookie", "link": "https://www.oneworld.cz/films/59270-endless-cookie", "desc": "A mischievous animated family portrait that entertains with a humorous look at the commotion in an Indigenous household, while also exposing Canada and its social inequalities.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20073"}, {"type": "Full-length documentary", "title": "Eyes of the Machine", "link": "https://www.oneworld.cz/films/59410-eyes-of-the-machine", "desc": "They forced her to teach Mandarin at a Uyghur internment camp. Now, safely abroad, this eyewitness to Chinese tyranny exposes the oppression that also struck her own family.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20074"}, {"type": "Feature film", "title": "Father", "link": "https://www.oneworld.cz/films/58976-father", "desc": "A single moment alters the course of the protagonist’s life. The film follows the consequences of a fatal mistake and asks whether one can continue living after another life has ended.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20075"}, {"type": "Full-length documentary", "title": "Fighter", "link": "https://www.oneworld.cz/films/57989-fighter", "desc": "Geir is a Norwegian MMA fighter for whom movement was the meaning of life. After diving into shallow water, however, he is partially paralyzed and gives himself a harsh ultimatum: either he walks agai", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20076"}, {"type": "Full-length documentary", "title": "Flood", "link": "https://www.oneworld.cz/films/59395-flood", "desc": "Director Katy Scoggin returns to her childhood home, which was strongly influenced by her orthodoxly religious father. During a family move, the conflict between faith and science is reopened - along ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20186"}, {"type": "Full-length documentary", "title": "Gunnar Goes Comfortable", "link": "https://www.oneworld.cz/films/58339-gunnar-goes-comfortable", "desc": "Gunnar is a young filmmaker with a passion for motorcycles, women, and addictive substances. At the same time, he struggles with deep feelings of self-loathing. When he is diagnosed with diabetes, lik", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20184"}, {"type": "Full-length documentary", "title": "Gunnar Goes God", "link": "https://www.oneworld.cz/films/58340-gunnar-goes-god", "desc": "Sometimes having it all—the perfect family, perfect house, and perfect job—is not enough to feel fulfilled, as this chronically unhappy director demonstrates in his explosive mix of toxicity and self-", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20080"}, {"type": "Full-length documentary", "title": "Homeless Blues", "link": "https://www.oneworld.cz/films/59500-homeless-blues", "desc": "Homeless people are a common yet overlooked presence in Prague. City districts often respond by pushing them out of public spaces, but this does nothing to address the problems they face.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20081"}, {"type": "Full-length documentary", "title": "How Deep is Your Love", "link": "https://www.oneworld.cz/films/57992-how-deep-is-your-love", "desc": "A film conceived as a love letter to the underwater world, written by a scientific expedition descending into the ocean’s depths. What might emerge from these strange encounters with mesmerizing, neon", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20082"}, {"type": "Feature film", "title": "How to Be Normal and the Oddness of the Other World", "link": "https://www.oneworld.cz/films/58167-how-to-be-normal-and-the-oddness-of-the-other-world", "desc": "After being discharged from a psychiatric hospital, Pia returns home and begins to confront everyday challenges, from work to relationships. She tries to face her psychoses head on and live like every", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20083"}, {"type": "Full-length documentary", "title": "Child of Dust", "link": "https://www.oneworld.cz/films/58062-child-of-dust", "desc": "This haunting film, infused with longing and hope, follows Sang, a Vietnamese man who, after years of living on the margins of society, takes a courageous step: to meet his American father for the fir", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20084"}, {"type": "Full-length documentary", "title": "Children of the Cult", "link": "https://www.oneworld.cz/films/58098-children-of-the-cult", "desc": "An investigative film that uncovers the disturbing inner workings of one of the world’s most notorious cults: Rajneesh, founded by the controversial guru Osho, who remains recognized by parts of socie", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20180"}, {"type": "Full-length documentary", "title": "I Follow Rivers", "link": "https://www.oneworld.cz/films/59016-i-follow-rivers", "desc": "Mariann Sæther is one of Norway’s most renowned kayakers. Her life is filled with both the thrill of white-water kayaking and raising her two young children, Benjamin and Saga. In her forties, Mariann", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20086"}, {"type": "Full-length documentary", "title": "I, Poppy", "link": "https://www.oneworld.cz/films/58316-i-poppy", "desc": "In the Indian countryside, where poppy cultivation has been an almost sacred mission for generations, an unequal struggle unfolds between the locals and a corrupt state apparatus.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20087"}, {"type": "Full-length documentary", "title": "Identity", "link": "https://www.oneworld.cz/films/59121-identity", "desc": "During Argentina’s military dictatorship in the 1970s, hundreds of children were abducted. Many of them were born in secret detention centers and are now searching for their true identities.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20179"}, {"type": "Virtual reality", "title": "If You See a Cat", "link": "https://www.oneworld.cz/films/59183-if-you-see-a-cat", "desc": "Have you ever wondered what it would be like to see the world through a cat’s eyes? This immersive virtual reality film offers a way to look at things from an unusual perspective.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20089"}, {"type": "Full-length documentary", "title": "In the Belly of AI", "link": "https://www.oneworld.cz/films/58362-in-the-belly-of-ai", "desc": "AI tools are used daily by hundreds of millions of people. Many see them as a beacon of hope for a brighter future. But what is the true cost of this technological progress? The film uncovers the dark", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20090"}, {"type": "Full-length documentary", "title": "IRKALLA: Dreams of Gilgamesh", "link": "https://www.oneworld.cz/films/58800-irkalla-dreams-of-gilgamesh", "desc": "Chum-Chum’s parents were killed by the Islamic State. To survive as an orphan on the streets of politically turbulent Baghdad, he retreats into the world of his favorite hero, Gilgamesh.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20092"}, {"type": "Feature film", "title": "It Was Just an Accident", "link": "https://www.oneworld.cz/films/58536-it-was-just-an-accident", "desc": "A chance sound drags Vahid back into haunting memories of a sadistic torturer. His heart swells with the desire for revenge, yet his conscience quietly urges him to gather more proof. Jafar Panahi’s s", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20093"}, {"type": "Full-length documentary", "title": "Jaripeo", "link": "https://www.oneworld.cz/films/59545-jaripeo", "desc": "In the seemingly masculine world of Mexican rodeo, clothing is stretched tight over the body, just like the tension in the arena. This glittering spectacle hides a deeper desire for the free expressio", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20178"}, {"type": "Short documentary", "title": "Just Jools", "link": "https://www.oneworld.cz/films/58445-just-jools", "desc": "Jools’ dream is to become a dancer. With the help of her teacher, the twelve-year-old gradually discovers how to overcome her physical limitations, gain self-confidence, and find joy in movement.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20181"}, {"type": "Full-length documentary", "title": "Kabul, Between Prayers", "link": "https://www.oneworld.cz/films/58515-kabul-between-prayers", "desc": "What’s it like to live as a member of the Taliban? Samim must balance patrolling Kabul, managing disputes with his wife, helping out on his father’s farm, and guiding his younger brothers in the faith", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20096"}, {"type": "Full-length documentary", "title": "Life After", "link": "https://www.oneworld.cz/films/58304-life-after", "desc": "Is assisted dying a free choice, or the result of systemic failure? A chilling probe into a reality where death is cheaper than dignified care.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20097"}, {"type": "Feature film", "title": "Love Letters", "link": "https://www.oneworld.cz/films/58120-love-letters", "desc": "A year after the legalization of same-sex marriage in France, Nadia and Céline are expecting a child. In their upcoming roles as mothers, they face their own doubts, the complexities of the system, an", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20176"}, {"type": "Full-length documentary", "title": "Lowland Kids", "link": "https://www.oneworld.cz/films/58000-lowland-kids", "desc": "A family on Isle de Jean Charles watches as the climate crisis takes away their home. Over the years, we witness farewells, resilience, and life amid the realities of climate-induced displacement.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20099"}, {"type": "Feature film", "title": "Lykke Post Partum", "link": "https://www.oneworld.cz/films/58386-lykke-post-partum", "desc": "Lykke lives on a picturesque farm with her loving family and is expecting her second child. Nothing seems to suggest that her happiness is about to unravel. Yet something is wrong.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20100"}, {"type": "Feature film", "title": "Made in EU", "link": "https://www.oneworld.cz/films/58981-made-in-eu", "desc": "Iva must go to work even when she’s sick, or risk losing most of her salary. When she becomes the first COVID patient in town, she faces accusations of endangering the entire city. An investigative co", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20101"}, {"type": "Full-length documentary", "title": "Mailin", "link": "https://www.oneworld.cz/films/59396-mailin", "desc": "A mother and daughter share a quiet evening ritual that gradually transforms into a dark tableau of memory and fear. The film sensitively observes how motherhood becomes a journey toward protection as", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20102"}, {"type": "Feature film", "title": "Manas", "link": "https://www.oneworld.cz/films/58072-manas", "desc": "Thirteen-year-old Marcielle is growing up in the seemingly idyllic environment of the Amazon rainforest. But as she enters adolescence, she becomes trapped in a vicious cycle of violence tolerated by ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20103"}, {"type": "Full-length documentary", "title": "Marlee Matlin: Not Alone Anymore", "link": "https://www.oneworld.cz/films/58263-marlee-matlin-not-alone-anymore", "desc": "She won an Oscar at just twenty-one, yet as a deaf actress, she has had to fight constantly to maintain her place in Hollywood.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20104"}, {"type": "Full-length documentary", "title": "Meant to Be", "link": "https://www.oneworld.cz/films/59414-meant-to-be", "desc": "Pogány Induló is a Hungarian rap star. For him, music is everything, and the adoration of his fans gives him a sense of purpose. Yet both come at a cost to his health and his life.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20157"}, {"type": "Full-length documentary", "title": "Mr. Nobody Against Putin", "link": "https://www.oneworld.cz/films/59797-mr-nobody-against-putin", "desc": "", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=19835"}, {"type": "Full-length documentary", "title": "My Boyfriend the Fascist", "link": "https://www.oneworld.cz/films/58321-my-boyfriend-the-fascist", "desc": "Couples therapy at the intersection of home video and social essay. Author Matthias Lintner unflinchingly turns the camera on himself and his boyfriend, who has begun to lean towards far-right ideolog", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20106"}, {"type": "Full-length documentary", "title": "My Father and Qaddafi", "link": "https://www.oneworld.cz/films/58882-my-father-and-qaddafi", "desc": "When Jihan was six years old, her father, Mansur Rashid Kikhia, flew to Cairo and never returned. The film portrays politics as a deeply personal experience that can affect even the most intimate fami", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20107"}, {"type": "Full-length documentary", "title": "My Word Against Mine", "link": "https://www.oneworld.cz/films/59403-my-word-against-mine", "desc": "One in ten people hears voices in their heads. Some of these voices have names, while others remain anonymous. Some want to help, others try to harm. In this unique cinematic experience, these inner v", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20108"}, {"type": "Feature film", "title": "Nomad Shadow", "link": "https://www.oneworld.cz/films/59000-nomad-shadow", "desc": "Few feelings in the world compare to the inner conflict Mariam experiences. Overnight, she is deported from Spain to her native Western Sahara, a land that is no longer what it once was.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20109"}, {"type": "Full-length documentary", "title": "North South Man Woman", "link": "https://www.oneworld.cz/films/58203-north-south-man-woman", "desc": "North Korean women seek love and stability in South Korea. This intimate and often humorous portrait explores relationships between two divided worlds.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20110"}, {"type": "Full-length documentary", "title": "Of Mud and Blood", "link": "https://www.oneworld.cz/films/58573-of-mud-and-blood", "desc": "The mountain village of Numbi in Congo is an inconspicuous hub of the globalised world. Hidden within the magnificent local landscape is a raw material without which our Western world would not exist.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20111"}, {"type": "Feature film", "title": "Our Father", "link": "https://www.oneworld.cz/films/58908-our-father", "desc": "Serbian priest Branislav Peranović runs a centre for drug addicts using controversial methods. This ambivalence-filled film poses the age-old question of whether inhumane methods leading to a seemingl", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20112"}, {"type": "Full-length documentary", "title": "Out of Frame", "link": "https://www.oneworld.cz/films/59518-out-of-frame", "desc": "Kurdish-Iranian filmmaker Bahman may have lost his sight, but he hasn’t lost his passion. Armed with a camera, he hitchhikes across Europe, capturing a world he can no longer see.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20113"}, {"type": "Full-length documentary", "title": "Politzek: The Voices That Defy the Kremlin", "link": "https://www.oneworld.cz/films/59301-politzek-the-voices-that-defy-the-kremlin", "desc": "What is the price of political activism in Russia? Putin’s regime labels any criticism of the state a terrorist act and sentences thousands to many years in prison.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20115"}, {"type": "Full-length documentary", "title": "Portrait of a Confused Father", "link": "https://www.oneworld.cz/films/58008-portrait-of-a-confused-father", "desc": "Is it even possible to be a good parent in a predatory age of illusory needs and false role models? Gunnar certainly tries. He is attentive, playful, and understanding. Yet over time, a dramatic rift ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20172"}, {"type": "Full-length documentary", "title": "Put Your Soul on Your Hand and Walk", "link": "https://www.oneworld.cz/films/58118-put-your-soul-on-your-hand-and-walk", "desc": "Fatima photographs life and death in a besieged Gaza. Her docu-diary comes to life through video calls with an Iranian director, creating an intimate bond between two women bound by helplessness but c", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20117"}, {"type": "Full-length documentary", "title": "Queer as Punk", "link": "https://www.oneworld.cz/films/58324-queer-as-punk", "desc": "“We’re Malaysian and queer!” The chant that opens every show sets the tone for punk band Shh…Diam!’s fight for freedom in a strictly Muslim country – both on stage and off.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20118"}, {"type": "Full-length documentary", "title": "Resilience", "link": "https://www.oneworld.cz/films/57973-resilience", "desc": "Humans can act as nature’s defenders or as an invasive species. While conservationist Pavel strives to ease environmental anxiety and become one with the land, Klára is hot on the trail of a bird pois", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20039"}, {"type": "Virtual reality", "title": "Revival Roadshow", "link": "https://www.oneworld.cz/films/59194-revival-roadshow", "desc": "This provocative comedy takes aim at consumerism, colonial fantasies, and the dangerous belief that charismatic leaders can save us from catastrophe.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20171"}, {"type": "Full-length documentary", "title": "River Dreams", "link": "https://www.oneworld.cz/films/59461-river-dreams", "desc": "The inner world of the Aksai River intertwines with the intimate dreams of young Kazakh women. Moving from poetic reflections on identity and the future, the protagonists gradually arrive at clearly f", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20120"}, {"type": "Full-length documentary", "title": "Searching for Satyrus", "link": "https://www.oneworld.cz/films/58849-searching-for-satyrus", "desc": "The mountains between the hostile nations of Azerbaijan and Armenia are the only place where a rare butterfly can be seen. The daughter of the entomologist after whom the butterfly is named embarks on", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20123"}, {"type": "Full-length documentary", "title": "She", "link": "https://www.oneworld.cz/films/58453-she", "desc": "This atmospheric film tells the story of Vietnamese women working in giant electronics factories. Their testimonies reveal lives shattered by capitalist exploitation and their marginalized position wi", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20197"}, {"type": "Short documentary", "title": "Sikoqqinngisaannassooq", "link": "https://www.oneworld.cz/films/59094-sikoqqinngisaannassooq", "desc": "Everyday life, culture, and traditions of the Greenlandic Inuit community are under threat from melting ice, a direct result of global warming.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20126"}, {"type": "Full-length documentary", "title": "Silent Flood", "link": "https://www.oneworld.cz/films/59546-silent-flood", "desc": "Closed religious communities are seemingly untouched by the war with Russia. Yet, its members decide to join the war effort—but in a way that does not violate their pacifist convictions.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20127"}, {"type": "Full-length documentary", "title": "Silver", "link": "https://www.oneworld.cz/films/58527-silver", "desc": "A portrait of a mining community working in one of the highest and most dangerous mines in the world. Through the eyes of a young boy, we witness a place where work, faith, and the constant presence o", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20128"}, {"type": "Short documentary", "title": "SIMÃO - Game Over", "link": "https://www.oneworld.cz/films/59675-sim-o-game-over", "desc": "A curious and imaginative boy, Simão creates his very own comic book, Game Over.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20129"}, {"type": "Full-length documentary", "title": "Slave Island", "link": "https://www.oneworld.cz/films/58957-slave-island", "desc": "An activist fights against slavery, which is still a living practice on the Indonesian island of Sumba. The struggle against it clashes with a system of ideology and faith in which not all lives are o", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20130"}, {"type": "Feature film", "title": "Sleepless City", "link": "https://www.oneworld.cz/films/58114-sleepless-city", "desc": "Life in an illegal Romani settlement in Spain is under the imminent threat of demolition. Through the eyes of an adolescent boy, an unstable home is transformed into a colorful kingdom where reality b", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20168"}, {"type": "Full-length documentary", "title": "Soldiers of Light", "link": "https://www.oneworld.cz/films/58692-soldiers-of-light", "desc": "From raw diets and dietary supplements to building one’s own empire. Where does one draw the line between a wellness lifestyle and dangerous conspiracy?", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20132"}, {"type": "Virtual reality", "title": "Space for Action", "link": "https://www.oneworld.cz/films/58409-space-for-action", "desc": "Violence alternates with love bombing, a seemingly endless cycle of abuse that many women are forced to endure. Inspired by real-life stories, this film gives survivors the space to express their expe", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20133"}, {"type": "Full-length documentary", "title": "SPI", "link": "https://www.oneworld.cz/films/59660-spi", "desc": "Dreams of her late grandfather bring director Sayun back to her native village, where she seeks to reconnect with her family legacy and traditional way of life.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20167"}, {"type": "Full-length documentary", "title": "Stardust", "link": "https://www.oneworld.cz/films/58636-stardust", "desc": "A journey across the vast Kazakh steppe in search of fragments of Soviet rockets reveals decades of the Soviet legacy. The lingering impacts of the Russian military-industrial complex continue to weig", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20135"}, {"type": "Full-length documentary", "title": "State of Firsts", "link": "https://www.oneworld.cz/films/58474-state-of-firsts", "desc": "Sarah McBride is the first openly transgender politician running for a seat in the U.S. Congress. Her historic candidacy, however, is shadowed by transphobic attacks and relentless media scrutiny.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20136"}, {"type": "Feature film", "title": "Sunshine", "link": "https://www.oneworld.cz/films/58760-sunshine", "desc": "A young gymnast unexpectedly falls pregnant before her Olympic selection trials. Her dilemma reflects the stifling reality of Philippine society and the possibility of deciding her own bodily autonomy", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20137"}, {"type": "Full-length documentary", "title": "Surviving the Death Committee", "link": "https://www.oneworld.cz/films/58862-surviving-the-death-committee", "desc": "An Iranian activist who survived political persecution and the brother of a murdered dissident, now living in Sweden, decide to confront a powerful regime and seek justice. What begins as a personal a", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20138"}, {"type": "Full-length documentary", "title": "Take the Money and Run", "link": "https://www.oneworld.cz/films/58012-take-the-money-and-run", "desc": "A work of art or outright theft? Jens Haaning borrowed half a million Danish crowns from a museum to create an art installation. He ended up submitting just two empty frames...", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20139"}, {"type": "Full-length documentary", "title": "Teenage Life Interrupted", "link": "https://www.oneworld.cz/films/58013-teenage-life-interrupted", "desc": "No known diagnosis can explain what’s happening to this group of Norwegian girls. Numbness in the limbs and fainting while fully conscious are just some of the symptoms of an illness that has disrupte", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20141"}, {"type": "Full-length documentary", "title": "The Coriolis Effect", "link": "https://www.oneworld.cz/films/58058-the-coriolis-effect", "desc": "A poetically catastrophic visual journey to Cape Verde, where locals are faced with the effects of climate change on an extraordinary and unsettling scale.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20211"}, {"type": "Full-length documentary", "title": "The Encampments", "link": "https://www.oneworld.cz/films/58015-the-encampments", "desc": "The largest protest movement since the Vietnam War era emerged in the spring of 2024 on the campus of Columbia University in New York. Hundreds of students were responding to the catastrophic humanita", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20069"}, {"type": "Full-length documentary", "title": "The End of Quiet", "link": "https://www.oneworld.cz/films/58310-the-end-of-quiet", "desc": "The residents of Green Bank, West Virginia, must live without Wi-Fi or mobile phones. Since the 1950s, a giant telescope has stood here, monitoring signals from outer space that must remain undisturbe", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20070"}, {"type": "Full-length documentary", "title": "The Pink Pill: Sex, Drugs & Who Has Control", "link": "https://www.oneworld.cz/films/59372-the-pink-pill-sex-drugs-who-has-control", "desc": "While male sexual fulfillment is celebrated and easily supported by pills like Viagra, female sexuality remains taboo. That all might be about to change with the idea for a single pill. An exhilaratin", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20174"}, {"type": "Virtual reality", "title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "link": "https://www.oneworld.cz/films/59193-the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody", "desc": "An animated Christmas tale about a clever little mouse driven by the pursuit of recognition and success, only to discover what is lost when genuine creativity is replaced by corporate practices and ma", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20121"}, {"type": "Full-length documentary", "title": "The Sandbox", "link": "https://www.oneworld.cz/films/59670-the-sandbox", "desc": "Borders are becoming laboratories where the latest surveillance technologies are tested on the most vulnerable. However, what is happening today to refugees away from public and media scrutiny could s", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20170"}, {"type": "Full-length documentary", "title": "The Shadow Scholars", "link": "https://www.oneworld.cz/films/58028-the-shadow-scholars", "desc": "Many educated people in Kenya are unable to find qualified work in their own country. As a result, they often make a living by writing essays for students at Western universities. How does this secret", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20124"}, {"type": "Full-length documentary", "title": "The Tale of Silyan", "link": "https://www.oneworld.cz/films/58883-the-tale-of-silyan", "desc": "A documentary fairy tale about a farmer who rediscovers life’s joy through an unexpected friendship with a stork.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20140"}, {"type": "Full-length documentary", "title": "The Track", "link": "https://www.oneworld.cz/films/58771-the-track", "desc": "A coming-of-age documentary from Bosnia and Herzegovina about three young boys chasing their Olympic dreams and a chance at a better life.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20166"}, {"type": "Feature film", "title": "The Voice of Hind Rajab", "link": "https://www.oneworld.cz/films/58968-the-voice-of-hind-rajab", "desc": "Red Crescent volunteers answer an emergency call: a six-year-old girl is trapped in a car under fire in Gaza, pleading for rescue. While keeping her on the line, the humanitarian workers do everything", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20146"}, {"type": "Full-length documentary", "title": "The Woman Who Poked The Leopard", "link": "https://www.oneworld.cz/films/59456-the-woman-who-poked-the-leopard", "desc": "A tender yet radical portrait of the struggle of a Ugandan activist, where arguments are no longer enough. Poetry and the exposed female body become instruments of resistance.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20153"}, {"type": "Full-length documentary", "title": "To the West, in Zapata", "link": "https://www.oneworld.cz/films/58051-to-the-west-in-zapata", "desc": "Deep in the wild Cuban wetlands, Lando seeks a living for his family. With the confidence of a seasoned hunter, he embarks on risky multi-day expeditions to hunt crocodiles.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20142"}, {"type": "Full-length documentary", "title": "Traces", "link": "https://www.oneworld.cz/films/59668-traces", "desc": "Iryna is haunted by recurring dreams of being back in her beloved garden in Donbas. Among the garden beds and structures, dark memories of wartime trauma emerge. Yet despite the violence she has endur", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20143"}, {"type": "Virtual reality", "title": "Under the Same Sky", "link": "https://www.oneworld.cz/films/58546-under-the-same-sky", "desc": "Under the same sky, a completely different world exists. This documentary film offers an intimate look into the daily reality of Gaza’s inhabitants and shows what life looks like amidst constant threa", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20145"}, {"type": "Full-length documentary", "title": "Vojta’s Life: A New Episode", "link": "https://www.oneworld.cz/films/59650-vojta-s-life-a-new-episode", "desc": "Approaching forty, Vojta lives alone in a small Prague studio apartment, navigates the city’s cultural and academic circles on a modest income, and searches for a close romantic connection. Can he fin", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20147"}, {"type": "Virtual reality", "title": "We Are Dead Animals", "link": "https://www.oneworld.cz/films/59656-we-are-dead-animals", "desc": "Have you ever wondered what a fox with a pigeon’s head might look like? This VR game lets you play with dead animals. You can revive them, splice them together, or even eat them to save yourself from ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20148"}, {"type": "Full-length documentary", "title": "Welded Together", "link": "https://www.oneworld.cz/films/58377-welded-together", "desc": "The gray social reality of today’s Belarus shines against the archetypal story of adolescence and the search for independence. Can a young welder piece together the dark fragments of her past and her ", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20149"}, {"type": "Full-length documentary", "title": "What About Petey?", "link": "https://www.oneworld.cz/films/59657-what-about-petey", "desc": "This intimate portrait of the relationship between a father and his son on the autism spectrum captures both the difficulty and the strength inherent in everyday caregiving. At the same time, it expos", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20150"}, {"type": "Full-length documentary", "title": "When I Get Jailed", "link": "https://www.oneworld.cz/films/59228-when-i-get-jailed", "desc": "Alyona Gribkova faces prison. The reason? A peaceful protest against a police raid during a memorial for the late opposition leader Alexei Navalny", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20151"}, {"type": "Full-length documentary", "title": "White Gold: Elon Musk and the Race for Argentina's Lithium", "link": "https://www.oneworld.cz/films/59601-white-gold-elon-musk-and-the-race-for-argentina-s-lithium", "desc": "Lithium is found in almost every electronic device, from mobile phones to computers. It’s, thus, no coincidence that it has earned the nickname “white gold.” But what is the true cost of its extractio", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20152"}, {"type": "Feature film", "title": "Yen and Ai-Lee", "link": "https://www.oneworld.cz/films/58379-yen-and-ai-lee", "desc": "Eight years after a desperate act to save her mother, Yen is released from prison and returns home to see her. She discovers that her home is no longer the place she once knew. Yet, while time has rel", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20165"}, {"type": "Feature film", "title": "Yes", "link": "https://www.oneworld.cz/films/58472-yes", "desc": "The enfant terrible of both festival and Israeli cinema, Nadav Lapid, returns in brutally sharp form, following a morally conflicted hero tasked with composing a new, more bellicose Israeli anthem.", "img": "https://muj.jedensvet.cz/filmimages/image.ashx?I=2&W=640&H=356&ID=0&IMGID=20155"}];
+const SCREENINGS_RAW = [{"raw": "11. 03. 20:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Meant to Be", "url": "https://www.oneworld.cz/detail/17052"}], "buy": "https://goout.net/en/listky/tak-to-melo-bejt/paujb/", "date_iso": "2026-03-11", "time": "20:00"}, {"raw": "11. 03. 21:00", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Meant to Be", "url": "https://www.oneworld.cz/detail/16982"}], "buy": "https://goout.net/en/listky/tak-to-melo-bejt/qvtjb/", "date_iso": "2026-03-11", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-12", "time": ""}, {"raw": "12. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Child of Dust", "url": "https://www.oneworld.cz/detail/16894"}], "buy": "https://goout.net/en/listky/sang-dite-prachu/grtjb/", "date_iso": "2026-03-12", "time": "15:00"}, {"raw": "12. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Marlee Matlin: Not Alone Anymore", "url": "https://www.oneworld.cz/detail/16880"}], "buy": "https://goout.net/en/listky/marlee-matlin-uz-nejsem-jedina/kptjb/", "date_iso": "2026-03-12", "time": "17:00"}, {"raw": "12. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Dangerous Games: Roblox and the Metaverse Exposed", "url": "https://www.oneworld.cz/detail/16888"}], "buy": "https://goout.net/en/listky/nebezpecne-hry-roblox-a-metaverzum/hrtjb/", "date_iso": "2026-03-12", "time": "17:15"}, {"raw": "12. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Eyes of the Machine", "url": "https://www.oneworld.cz/detail/16977"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-12&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-12", "time": "17:30"}, {"raw": "12. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Teenage Life Interrupted", "url": "https://www.oneworld.cz/detail/17021"}], "buy": "https://goout.net/en/listky/dospivani-preruseno/qutjb/", "date_iso": "2026-03-12", "time": "17:30"}, {"raw": "12. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Mailin", "url": "https://www.oneworld.cz/detail/16860"}], "buy": "https://goout.net/en/listky/mailin/motjb/", "date_iso": "2026-03-12", "time": "18:00"}, {"raw": "12. 03. 18:00", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "When I Get Jailed", "url": "https://www.oneworld.cz/detail/16972"}], "buy": "https://goout.net/en/listky/az-me-zabasnou/laujb/", "date_iso": "2026-03-12", "time": "18:00"}, {"raw": "12. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "White Gold: Elon Musk and the Race for Argentina's Lithium", "url": "https://www.oneworld.cz/detail/17005"}], "buy": "https://goout.net/en/listky/elon-musk-a-zavod-o-lithium/sytjb/", "date_iso": "2026-03-12", "time": "18:00"}, {"raw": "12. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Dear Tomorrow", "url": "https://www.oneworld.cz/detail/17043"}], "buy": "https://goout.net/en/listky/drahy-zitrku/qaujb/", "date_iso": "2026-03-12", "time": "18:00"}, {"raw": "12. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Identity", "url": "https://www.oneworld.cz/detail/17069"}], "buy": "https://goout.net/en/listky/ztracene-identity/dcujb/", "date_iso": "2026-03-12", "time": "18:00"}, {"raw": "12. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Stardust", "url": "https://www.oneworld.cz/detail/17037"}], "buy": "https://goout.net/en/listky/hvezdny-prach/pttjb/", "date_iso": "2026-03-12", "time": "18:30"}, {"raw": "12. 03. 19:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "My Boyfriend the Fascist", "url": "https://www.oneworld.cz/detail/17081"}], "buy": "https://goout.net/en/listky/randim-s-fasistou/pbujb/", "date_iso": "2026-03-12", "time": "19:00"}, {"raw": "12. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Better Go Mad in the Wild", "url": "https://www.oneworld.cz/detail/16871"}], "buy": "https://goout.net/en/listky/radeji-zesilet-v-divocine/lptjb/", "date_iso": "2026-03-12", "time": "20:00"}, {"raw": "12. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "SPI", "url": "https://www.oneworld.cz/detail/16905"}], "buy": "https://goout.net/en/listky/sni/jrtjb/", "date_iso": "2026-03-12", "time": "20:00"}, {"raw": "12. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Coexistence, My Ass!", "url": "https://www.oneworld.cz/detail/16863"}], "buy": "https://goout.net/en/listky/koexistence-vole/notjb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Death of Death", "url": "https://www.oneworld.cz/detail/16960"}], "buy": "https://goout.net/en/listky/smrti-smrt/kaujb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Made in EU", "url": "https://www.oneworld.cz/detail/16981"}], "buy": "https://goout.net/en/listky/made-in-eu/tvtjb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Father", "url": "https://www.oneworld.cz/detail/16993"}], "buy": "https://goout.net/en/listky/otec/rytjb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Flood", "url": "https://www.oneworld.cz/detail/17008"}], "buy": "https://goout.net/en/listky/potopa/rutjb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "A Fox Under a Pink Moon", "url": "https://www.oneworld.cz/detail/17042"}], "buy": "https://goout.net/en/listky/liska-a-ruzova-luna/raujb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 20:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Yen and Ai-Lee", "url": "https://www.oneworld.cz/detail/17076"}], "buy": "https://goout.net/en/listky/yen-a-ai-lee/ecujb/", "date_iso": "2026-03-12", "time": "20:30"}, {"raw": "12. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "It Was Just an Accident", "url": "https://www.oneworld.cz/detail/17030"}], "buy": "https://goout.net/en/listky/drobna-nehoda/qttjb/", "date_iso": "2026-03-12", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-13", "time": ""}, {"raw": "13. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Sunshine", "url": "https://www.oneworld.cz/detail/16906"}], "buy": "https://goout.net/en/listky/sunshine/krtjb/", "date_iso": "2026-03-13", "time": "15:00"}, {"raw": "13. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Yen and Ai-Lee", "url": "https://www.oneworld.cz/detail/16885"}], "buy": "https://goout.net/en/listky/yen-a-ai-lee/mptjb/", "date_iso": "2026-03-13", "time": "17:00"}, {"raw": "13. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Manas", "url": "https://www.oneworld.cz/detail/16901"}], "buy": "https://goout.net/en/listky/zenou-v-amazonii/nrtjb/", "date_iso": "2026-03-13", "time": "17:15"}, {"raw": "13. 03. 17:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Out of Frame", "url": "https://www.oneworld.cz/detail/16966"}], "buy": "https://goout.net/en/listky/mimo-zaber/jaujb/", "date_iso": "2026-03-13", "time": "17:30"}, {"raw": "13. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Resilience", "url": "https://www.oneworld.cz/detail/16984"}], "buy": "https://goout.net/en/listky/pri-zemi/vvtjb/", "date_iso": "2026-03-13", "time": "17:30"}, {"raw": "13. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Our Father", "url": "https://www.oneworld.cz/detail/17017"}], "buy": "https://goout.net/en/listky/otce-nas/sutjb/", "date_iso": "2026-03-13", "time": "17:30"}, {"raw": "13. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Take the Money and Run", "url": "https://www.oneworld.cz/detail/16865"}], "buy": "https://goout.net/en/listky/seber-prachy-a-zmiz/ootjb/", "date_iso": "2026-03-13", "time": "18:00"}, {"raw": "13. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "The Tale of Silyan", "url": "https://www.oneworld.cz/detail/17004"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-13&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-13", "time": "18:00"}, {"raw": "13. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "In the Belly of AI", "url": "https://www.oneworld.cz/detail/17050"}], "buy": "https://goout.net/en/listky/v-utrobach-ai/saujb/", "date_iso": "2026-03-13", "time": "18:00"}, {"raw": "13. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Life After", "url": "https://www.oneworld.cz/detail/17071"}], "buy": "https://goout.net/en/listky/pravo-nezemrit/fcujb/", "date_iso": "2026-03-13", "time": "18:00"}, {"raw": "13. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Put Your Soul on Your Hand and Walk", "url": "https://www.oneworld.cz/detail/17032"}], "buy": "https://goout.net/en/listky/jit-s-dusi-na-dlani/rttjb/", "date_iso": "2026-03-13", "time": "18:30"}, {"raw": "13. 03. 19:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Portrait of a Confused Father", "url": "https://www.oneworld.cz/detail/17082"}], "buy": "https://goout.net/en/listky/portret-rozpaciteho-otce/mbujb/", "date_iso": "2026-03-13", "time": "19:00"}, {"raw": "13. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "How to Be Normal and the Oddness of the Other World", "url": "https://www.oneworld.cz/detail/16875"}], "buy": "https://goout.net/en/listky/jak-byt-normalni-a-vsechny-podivnosti-sveta/nptjb/", "date_iso": "2026-03-13", "time": "20:00"}, {"raw": "13. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Action Item", "url": "https://www.oneworld.cz/detail/16887"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-13&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-13", "time": "20:00"}, {"raw": "13. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Traces", "url": "https://www.oneworld.cz/detail/16868"}], "buy": "https://goout.net/en/listky/po-stopach/potjb/", "date_iso": "2026-03-13", "time": "20:30"}, {"raw": "13. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Silent Flood", "url": "https://www.oneworld.cz/detail/16967"}], "buy": "https://goout.net/en/listky/ticha-povoden/iaujb/", "date_iso": "2026-03-13", "time": "20:30"}, {"raw": "13. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "The Voice of Hind Rajab", "url": "https://www.oneworld.cz/detail/16987"}], "buy": "https://goout.net/en/listky/hlas-hind-radzab/xvtjb/", "date_iso": "2026-03-13", "time": "20:30"}, {"raw": "13. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Silver", "url": "https://www.oneworld.cz/detail/16999"}], "buy": "https://goout.net/en/listky/stribro/pytjb/", "date_iso": "2026-03-13", "time": "20:30"}, {"raw": "13. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Soldiers of Light", "url": "https://www.oneworld.cz/detail/17019"}], "buy": "https://goout.net/en/listky/bojovnici-svetla/tutjb/", "date_iso": "2026-03-13", "time": "20:30"}, {"raw": "13. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Children of the Cult", "url": "https://www.oneworld.cz/detail/17048"}], "buy": "https://goout.net/en/listky/deti-sekty/taujb/", "date_iso": "2026-03-13", "time": "20:30"}, {"raw": "13. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "To the West, in Zapata", "url": "https://www.oneworld.cz/detail/17039"}], "buy": "https://goout.net/en/listky/na-zapad-do-zapaty/sttjb/", "date_iso": "2026-03-13", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-14", "time": ""}, {"raw": "14. 03. 15:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Dangerous Games: Roblox and the Metaverse Exposed", "url": "https://www.oneworld.cz/detail/16855"}], "buy": "https://goout.net/en/listky/nebezpecne-hry-roblox-a-metaverzum/sotjb/", "date_iso": "2026-03-14", "time": "15:00"}, {"raw": "14. 03. 15:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Father", "url": "https://www.oneworld.cz/detail/16873"}], "buy": "https://goout.net/en/listky/otec/pptjb/", "date_iso": "2026-03-14", "time": "15:00"}, {"raw": "14. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Lowland Kids", "url": "https://www.oneworld.cz/detail/16898"}], "buy": "https://goout.net/en/listky/deti-z-mizejiciho-ostrova/vrtjb/", "date_iso": "2026-03-14", "time": "15:00"}, {"raw": "14. 03. 15:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "North South Man Woman", "url": "https://www.oneworld.cz/detail/16996"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-14&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-14", "time": "15:00"}, {"raw": "14. 03. 15:00", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Just Jools", "url": "https://www.oneworld.cz/films/58445-just-jools"}, {"title": "Don't Blow It Up", "url": "https://www.oneworld.cz/films/59674-don-t-blow-it-up"}, {"title": "SIMÃO - Game Over", "url": "https://www.oneworld.cz/films/59675-sim-o-game-over"}], "buy": "https://goout.net/en/listky/jeden-svet-projekce-pro-rodiny-i/uutjb/", "date_iso": "2026-03-14", "time": "15:00"}, {"raw": "14. 03. 15:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Surviving the Death Committee", "url": "https://www.oneworld.cz/detail/17086"}], "buy": "https://goout.net/en/listky/pred-komisi-smrti/nbujb/", "date_iso": "2026-03-14", "time": "15:00"}, {"raw": "14. 03. 15:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Allah Is Not Obliged", "url": "https://www.oneworld.cz/detail/16957"}], "buy": "https://goout.net/en/listky/allah-neni-povinen/haujb/", "date_iso": "2026-03-14", "time": "15:30"}, {"raw": "14. 03. 15:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Driving Europe", "url": "https://www.oneworld.cz/detail/17044"}], "buy": "https://goout.net/en/listky/stavka-kamionu/uaujb/", "date_iso": "2026-03-14", "time": "15:30"}, {"raw": "14. 03. 15:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "The Woman Who Poked The Leopard", "url": "https://www.oneworld.cz/detail/17074"}], "buy": "https://goout.net/en/listky/zena-ktera-drazdila-leoparda/kcujb/", "date_iso": "2026-03-14", "time": "15:30"}, {"raw": "14. 03. 16:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "What About Petey?", "url": "https://www.oneworld.cz/detail/17040"}], "buy": "https://goout.net/en/listky/co-s-petou/uttjb/", "date_iso": "2026-03-14", "time": "16:00"}, {"raw": "14. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Yes", "url": "https://www.oneworld.cz/detail/16886"}], "buy": "https://goout.net/en/listky/ano/tptjb/", "date_iso": "2026-03-14", "time": "17:00"}, {"raw": "14. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Love Letters", "url": "https://www.oneworld.cz/detail/16897"}], "buy": "https://goout.net/en/listky/dukazy-lasky/yrtjb/", "date_iso": "2026-03-14", "time": "17:15"}, {"raw": "14. 03. 17:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "The End of Quiet", "url": "https://www.oneworld.cz/detail/16970"}], "buy": "https://goout.net/en/listky/na-konci-ticha/gaujb/", "date_iso": "2026-03-14", "time": "17:30"}, {"raw": "14. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Homeless Blues", "url": "https://www.oneworld.cz/detail/16978"}], "buy": "https://goout.net/en/listky/homeless-blues/yvtjb/", "date_iso": "2026-03-14", "time": "17:30"}, {"raw": "14. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Lykke Post Partum", "url": "https://www.oneworld.cz/detail/17010"}], "buy": "https://goout.net/en/listky/lykke-post-partum/vutjb/", "date_iso": "2026-03-14", "time": "17:30"}, {"raw": "14. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Queer as Punk", "url": "https://www.oneworld.cz/detail/16861"}], "buy": "https://goout.net/en/listky/queer-jak-punk/totjb/", "date_iso": "2026-03-14", "time": "18:00"}, {"raw": "14. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "She", "url": "https://www.oneworld.cz/detail/16998"}], "buy": "https://goout.net/en/listky/ona/nytjb/", "date_iso": "2026-03-14", "time": "18:00"}, {"raw": "14. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Slave Island", "url": "https://www.oneworld.cz/detail/17054"}], "buy": "https://goout.net/en/listky/otrokarsky-raj/iutjb/", "date_iso": "2026-03-14", "time": "18:00"}, {"raw": "14. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "9-Month Contract", "url": "https://www.oneworld.cz/detail/17062"}], "buy": "https://goout.net/en/listky/smlouva-na-devet-mesicu/ncujb/", "date_iso": "2026-03-14", "time": "18:00"}, {"raw": "14. 03. 18:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Devi", "url": "https://www.oneworld.cz/detail/17077"}], "buy": "https://goout.net/en/listky/devi/obujb/", "date_iso": "2026-03-14", "time": "18:00"}, {"raw": "14. 03. 18:00", "venue": "The Lounge at Café Lucerna (evening podcast stage)", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "GoOut", "url": "https://goout.net/en/tickets/jeden-svet-bojs/xkhkb/"}], "buy": "https://goout.net/en/tickets/jeden-svet-bojs/xkhkb/", "date_iso": "2026-03-14", "time": "18:00"}, {"raw": "14. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Nomad Shadow", "url": "https://www.oneworld.cz/detail/17031"}], "buy": "https://goout.net/en/listky/stin-nomadky/wttjb/", "date_iso": "2026-03-14", "time": "18:30"}, {"raw": "14. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Welded Together", "url": "https://www.oneworld.cz/detail/16884"}], "buy": "https://goout.net/en/listky/spolu-svareny/vptjb/", "date_iso": "2026-03-14", "time": "20:00"}, {"raw": "14. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Sleepless City", "url": "https://www.oneworld.cz/detail/16904"}], "buy": "https://goout.net/en/listky/mesto-ktere-bdi/bstjb/", "date_iso": "2026-03-14", "time": "20:00"}, {"raw": "14. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "River Dreams", "url": "https://www.oneworld.cz/detail/16854"}], "buy": "https://goout.net/en/listky/ricni-sneni/uotjb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Child of Dust", "url": "https://www.oneworld.cz/detail/16961"}], "buy": "https://goout.net/en/listky/sang-dite-prachu/eaujb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Searching for Satyrus", "url": "https://www.oneworld.cz/detail/16985"}], "buy": "https://goout.net/en/listky/patrani-po-satyrovi/uwtjb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "The Shadow Scholars", "url": "https://www.oneworld.cz/detail/17003"}], "buy": "https://goout.net/en/listky/stinova-akademie/fytjb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "My Word Against Mine", "url": "https://www.oneworld.cz/detail/17013"}], "buy": "https://goout.net/en/listky/moje-slovo-proti-memu/wutjb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "How Deep is Your Love", "url": "https://www.oneworld.cz/detail/17047"}], "buy": "https://goout.net/en/listky/voda-co-me-drzi-pod-vodou/gutjb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Endless Cookie", "url": "https://www.oneworld.cz/detail/17067"}], "buy": "https://goout.net/en/listky/nekonecna-cookie/ocujb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 20:30", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "State of Firsts", "url": "https://www.oneworld.cz/detail/17085"}], "buy": "https://goout.net/en/listky/zeme-prvnich/qbujb/", "date_iso": "2026-03-14", "time": "20:30"}, {"raw": "14. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "The Track", "url": "https://www.oneworld.cz/detail/17038"}], "buy": "https://goout.net/en/listky/draha-ze-sarajeva/yttjb/", "date_iso": "2026-03-14", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-15", "time": ""}, {"raw": "15. 03. 15:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Resilience", "url": "https://www.oneworld.cz/detail/16862"}], "buy": "https://goout.net/en/listky/pri-zemi/votjb/", "date_iso": "2026-03-15", "time": "15:00"}, {"raw": "15. 03. 15:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "I, Poppy", "url": "https://www.oneworld.cz/detail/16876"}], "buy": "https://goout.net/en/listky/me-makove-ja/uptjb/", "date_iso": "2026-03-15", "time": "15:00"}, {"raw": "15. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Out of Frame", "url": "https://www.oneworld.cz/detail/16902"}], "buy": "https://goout.net/en/listky/mimo-zaber/fstjb/", "date_iso": "2026-03-15", "time": "15:00"}, {"raw": "15. 03. 15:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "The Pink Pill: Sex, Drugs & Who Has Control", "url": "https://www.oneworld.cz/detail/17002"}], "buy": "https://goout.net/en/listky/sex-pilulky-and-moc/eytjb/", "date_iso": "2026-03-15", "time": "15:00"}, {"raw": "15. 03. 15:00", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Alex – Everyone is Special", "url": "https://www.oneworld.cz/films/59644-alex-everyone-is-special"}, {"title": "Sikoqqinngisaannassooq", "url": "https://www.oneworld.cz/films/59094-sikoqqinngisaannassooq"}, {"title": "Ela – Can Jump", "url": "https://www.oneworld.cz/films/59635-ela-can-jump"}], "buy": "https://goout.net/en/listky/jeden-svet-projekce-pro-rodiny-ii/xutjb/", "date_iso": "2026-03-15", "time": "15:00"}, {"raw": "15. 03. 15:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Cuba&Alaska", "url": "https://www.oneworld.cz/detail/17089"}], "buy": "https://goout.net/en/listky/kuba-and-aljaska/rbujb/", "date_iso": "2026-03-15", "time": "15:00"}, {"raw": "15. 03. 15:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Deaf", "url": "https://www.oneworld.cz/detail/16959"}], "buy": "https://goout.net/en/listky/slysis-me/daujb/", "date_iso": "2026-03-15", "time": "15:30"}, {"raw": "15. 03. 15:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Stardust", "url": "https://www.oneworld.cz/detail/17055"}], "buy": "https://goout.net/en/listky/hvezdny-prach/abujb/", "date_iso": "2026-03-15", "time": "15:30"}, {"raw": "15. 03. 15:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Children of the Cult", "url": "https://www.oneworld.cz/detail/17068"}], "buy": "https://goout.net/en/listky/deti-sekty/pcujb/", "date_iso": "2026-03-15", "time": "15:30"}, {"raw": "15. 03. 16:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "She", "url": "https://www.oneworld.cz/detail/17034"}], "buy": "https://goout.net/en/listky/ona/autjb/", "date_iso": "2026-03-15", "time": "16:00"}, {"raw": "15. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "The Encampments", "url": "https://www.oneworld.cz/detail/16882"}], "buy": "https://goout.net/en/listky/studentstvo-pro-gazu/wptjb/", "date_iso": "2026-03-15", "time": "17:00"}, {"raw": "15. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Take the Money and Run", "url": "https://www.oneworld.cz/detail/16908"}], "buy": "https://goout.net/en/listky/seber-prachy-a-zmiz/lstjb/", "date_iso": "2026-03-15", "time": "17:15"}, {"raw": "15. 03. 17:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "My Father and Qaddafi", "url": "https://www.oneworld.cz/detail/16964"}], "buy": "https://goout.net/en/listky/muj-otec-a-kaddafi/caujb/", "date_iso": "2026-03-15", "time": "17:30"}, {"raw": "15. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "2000 Meters to Andriivka", "url": "https://www.oneworld.cz/detail/16973"}], "buy": "https://goout.net/en/listky/2000-metru-do-andrijivky/wwtjb/", "date_iso": "2026-03-15", "time": "17:30"}, {"raw": "15. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "My Boyfriend the Fascist", "url": "https://www.oneworld.cz/detail/17012"}], "buy": "https://goout.net/en/listky/randim-s-fasistou/avtjb/", "date_iso": "2026-03-15", "time": "17:30"}, {"raw": "15. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Mr. Nobody Against Putin", "url": "https://www.oneworld.cz/detail/16853"}], "buy": "https://goout.net/en/listky/pridana-projekce-i/naujb/", "date_iso": "2026-03-15", "time": "18:00"}, {"raw": "15. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Teenage Life Interrupted", "url": "https://www.oneworld.cz/detail/17001"}], "buy": "https://goout.net/en/listky/dospivani-preruseno/dytjb/", "date_iso": "2026-03-15", "time": "18:00"}, {"raw": "15. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Fighter", "url": "https://www.oneworld.cz/detail/17046"}], "buy": "https://goout.net/en/listky/zapasnik/bbujb/", "date_iso": "2026-03-15", "time": "18:00"}, {"raw": "15. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "32 Meters", "url": "https://www.oneworld.cz/detail/17061"}], "buy": "https://goout.net/en/listky/32-metru/xcujb/", "date_iso": "2026-03-15", "time": "18:00"}, {"raw": "15. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Silent Flood", "url": "https://www.oneworld.cz/detail/17035"}], "buy": "https://goout.net/en/listky/ticha-povoden/cutjb/", "date_iso": "2026-03-15", "time": "18:30"}, {"raw": "15. 03. 19:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Soldiers of Light", "url": "https://www.oneworld.cz/detail/17084"}], "buy": "https://goout.net/en/listky/bojovnici-svetla/sbujb/", "date_iso": "2026-03-15", "time": "19:00"}, {"raw": "15. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Jaripeo", "url": "https://www.oneworld.cz/detail/16877"}], "buy": "https://goout.net/en/listky/queer-rodeo/xptjb/", "date_iso": "2026-03-15", "time": "20:00"}, {"raw": "15. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Mailin", "url": "https://www.oneworld.cz/detail/16900"}], "buy": "https://goout.net/en/listky/mailin/nstjb/", "date_iso": "2026-03-15", "time": "20:00"}, {"raw": "15. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "SPI", "url": "https://www.oneworld.cz/detail/16864"}], "buy": "https://goout.net/en/listky/sni/yotjb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Of Mud and Blood", "url": "https://www.oneworld.cz/detail/16965"}], "buy": "https://goout.net/en/listky/z-bahna-a-krve/baujb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Cutting Through Rocks", "url": "https://www.oneworld.cz/detail/16976"}], "buy": "https://goout.net/en/listky/projet-pres-prekazky/xwtjb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "IRKALLA: Dreams of Gilgamesh", "url": "https://www.oneworld.cz/detail/16994"}], "buy": "https://goout.net/en/listky/sen-o-gilgamesovi/cytjb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Manas", "url": "https://www.oneworld.cz/detail/17011"}], "buy": "https://goout.net/en/listky/zenou-v-amazonii/bvtjb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Elon Musk Unveiled - The Tesla Experiment", "url": "https://www.oneworld.cz/detail/17045"}], "buy": "https://goout.net/en/listky/elon-a-pokusni-kralici/cbujb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 20:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Kabul, Between Prayers", "url": "https://www.oneworld.cz/detail/17070"}], "buy": "https://goout.net/en/listky/kabul-mezi-modlitbami/ycujb/", "date_iso": "2026-03-15", "time": "20:30"}, {"raw": "15. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "When I Get Jailed", "url": "https://www.oneworld.cz/detail/17041"}], "buy": "https://goout.net/en/listky/az-me-zabasnou/dutjb/", "date_iso": "2026-03-15", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-16", "time": ""}, {"raw": "16. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Identity", "url": "https://www.oneworld.cz/detail/16895"}], "buy": "https://goout.net/en/listky/ztracene-identity/ostjb/", "date_iso": "2026-03-16", "time": "15:00"}, {"raw": "16. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "9-Month Contract", "url": "https://www.oneworld.cz/detail/16870"}], "buy": "https://goout.net/en/listky/smlouva-na-devet-mesicu/yptjb/", "date_iso": "2026-03-16", "time": "17:00"}, {"raw": "16. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Surviving the Death Committee", "url": "https://www.oneworld.cz/detail/16907"}], "buy": "https://goout.net/en/listky/pred-komisi-smrti/pstjb/", "date_iso": "2026-03-16", "time": "17:15"}, {"raw": "16. 03. 17:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "A Free Daughter of Free Kyrgyzstan", "url": "https://www.oneworld.cz/detail/16956"}], "buy": "https://goout.net/en/listky/rebelska-raperka-z-kyrgyzstanu/aaujb/", "date_iso": "2026-03-16", "time": "17:30"}, {"raw": "16. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "North South Man Woman", "url": "https://www.oneworld.cz/detail/16983"}], "buy": "https://goout.net/en/listky/severni-korea-jizni-romance/bxtjb/", "date_iso": "2026-03-16", "time": "17:30"}, {"raw": "16. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Nomad Shadow", "url": "https://www.oneworld.cz/detail/17014"}], "buy": "https://goout.net/en/listky/stin-nomadky/cvtjb/", "date_iso": "2026-03-16", "time": "17:30"}, {"raw": "16. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Endless Cookie", "url": "https://www.oneworld.cz/detail/16857"}], "buy": "https://goout.net/en/listky/nekonecna-cookie/bptjb/", "date_iso": "2026-03-16", "time": "18:00"}, {"raw": "16. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Death of Death", "url": "https://www.oneworld.cz/detail/16991"}], "buy": "https://goout.net/en/listky/smrti-smrt/aytjb/", "date_iso": "2026-03-16", "time": "18:00"}, {"raw": "16. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Politzek: The Voices That Defy the Kremlin", "url": "https://www.oneworld.cz/detail/17053"}], "buy": "https://goout.net/en/listky/hlasy-proti-kremlu/dbujb/", "date_iso": "2026-03-16", "time": "18:00"}, {"raw": "16. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Better Go Mad in the Wild", "url": "https://www.oneworld.cz/detail/17063"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-16&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-16", "time": "18:00"}, {"raw": "16. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Devi", "url": "https://www.oneworld.cz/detail/17026"}], "buy": "https://goout.net/en/listky/devi/eutjb/", "date_iso": "2026-03-16", "time": "18:30"}, {"raw": "16. 03. 19:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "In the Belly of AI", "url": "https://www.oneworld.cz/detail/17078"}], "buy": "https://goout.net/en/listky/v-utrobach-ai/ubujb/", "date_iso": "2026-03-16", "time": "19:00"}, {"raw": "16. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Gunnar Goes Comfortable", "url": "https://www.oneworld.cz/detail/16874"}], "buy": "https://goout.net/en/listky/gunnar-jde-do-pohody/gqtjb/", "date_iso": "2026-03-16", "time": "20:00"}, {"raw": "16. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Eyes of the Machine", "url": "https://www.oneworld.cz/detail/16891"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-16&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-16", "time": "20:00"}, {"raw": "16. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "The Coriolis Effect", "url": "https://www.oneworld.cz/detail/16866"}], "buy": "https://goout.net/en/listky/oko-hurikanu/cptjb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Carmela and the Walkers", "url": "https://www.oneworld.cz/detail/16958"}], "buy": "https://goout.net/en/listky/carmela-a-ti-co-prochazi/yytjb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "80 Angry Journalists", "url": "https://www.oneworld.cz/detail/16974"}], "buy": "https://goout.net/en/listky/80-rozlicenych-novinaru/dxtjb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Our Father", "url": "https://www.oneworld.cz/detail/16997"}], "buy": "https://goout.net/en/listky/otce-nas/yxtjb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Action Item", "url": "https://www.oneworld.cz/detail/17007"}], "buy": "https://goout.net/en/listky/neplacene-volno/evtjb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Yes", "url": "https://www.oneworld.cz/detail/17060"}], "buy": "https://goout.net/en/listky/ano/ebujb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 20:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "What About Petey?", "url": "https://www.oneworld.cz/detail/17075"}], "buy": "https://goout.net/en/listky/co-s-petou/wcujb/", "date_iso": "2026-03-16", "time": "20:30"}, {"raw": "16. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Allah Is Not Obliged", "url": "https://www.oneworld.cz/detail/17024"}], "buy": "https://goout.net/en/listky/allah-neni-povinen/futjb/", "date_iso": "2026-03-16", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-17", "time": ""}, {"raw": "17. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Silver", "url": "https://www.oneworld.cz/detail/16903"}], "buy": "https://goout.net/en/listky/stribro/rstjb/", "date_iso": "2026-03-17", "time": "15:00"}, {"raw": "17. 03. 17:00", "venue": "ARCHA+ (Small Hall)", "address": "Na Poříčí 26, Praha 1", "films": [{"title": "The Tale of Silyan", "url": "https://www.oneworld.cz/detail/16848"}], "buy": "https://goout.net/en/listky/pribeh-o-siljanovi/kotjb/", "date_iso": "2026-03-17", "time": "17:00"}, {"raw": "17. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Life After", "url": "https://www.oneworld.cz/detail/16878"}], "buy": "https://goout.net/en/listky/pravo-nezemrit/iqtjb/", "date_iso": "2026-03-17", "time": "17:00"}, {"raw": "17. 03. 17:00", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Portrait of a Confused Father", "url": "https://www.oneworld.cz/detail/17018"}], "buy": "https://goout.net/en/listky/portret-rozpaciteho-otce/fvtjb/", "date_iso": "2026-03-17", "time": "17:00"}, {"raw": "17. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Deaf", "url": "https://www.oneworld.cz/detail/16889"}], "buy": "https://goout.net/en/listky/slysis-me/sstjb/", "date_iso": "2026-03-17", "time": "17:15"}, {"raw": "17. 03. 17:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Sleepless City", "url": "https://www.oneworld.cz/detail/16968"}], "buy": "https://goout.net/en/listky/mesto-ktere-bdi/wytjb/", "date_iso": "2026-03-17", "time": "17:30"}, {"raw": "17. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "I Follow Rivers", "url": "https://www.oneworld.cz/detail/16979"}], "buy": "https://goout.net/en/listky/reky-lasky-proud/gxtjb/", "date_iso": "2026-03-17", "time": "17:30"}, {"raw": "17. 03. 18:00", "venue": "ARCHA+ (Large Hall)", "address": "Na Poříčí 26, Praha 1", "films": [{"title": "AMOOSED: a moose odyssey", "url": "https://www.oneworld.cz/detail/16849"}], "buy": "https://goout.net/en/listky/amoosed-losi-odysea/hotjb/", "date_iso": "2026-03-17", "time": "18:00"}, {"raw": "17. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "The Track", "url": "https://www.oneworld.cz/detail/16867"}], "buy": "https://goout.net/en/listky/draha-ze-sarajeva/dptjb/", "date_iso": "2026-03-17", "time": "18:00"}, {"raw": "17. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "The Pink Pill: Sex, Drugs & Who Has Control", "url": "https://www.oneworld.cz/detail/17057"}], "buy": "https://goout.net/en/listky/sex-pilulky-and-moc/fbujb/", "date_iso": "2026-03-17", "time": "18:00"}, {"raw": "17. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Coexistence, My Ass!", "url": "https://www.oneworld.cz/detail/17064"}], "buy": "https://goout.net/en/listky/koexistence-vole/ucujb/", "date_iso": "2026-03-17", "time": "18:00"}, {"raw": "17. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Cuba&Alaska", "url": "https://www.oneworld.cz/detail/17088"}], "buy": "https://goout.net/en/listky/kuba-and-aljaska/wxtjb/", "date_iso": "2026-03-17", "time": "18:00"}, {"raw": "17. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "How Deep is Your Love", "url": "https://www.oneworld.cz/detail/17028"}], "buy": "https://goout.net/en/listky/voda-co-me-drzi-pod-vodou/xaujb/", "date_iso": "2026-03-17", "time": "18:30"}, {"raw": "17. 03. 19:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Meant to Be", "url": "https://www.oneworld.cz/detail/17080"}], "buy": "https://goout.net/en/listky/tak-to-melo-bejt/vbujb/", "date_iso": "2026-03-17", "time": "19:00"}, {"raw": "17. 03. 19:30", "venue": "ARCHA+ (Small Hall)", "address": "Na Poříčí 26, Praha 1", "films": [{"title": "Of Mud and Blood", "url": "https://www.oneworld.cz/detail/16847"}], "buy": "https://goout.net/en/listky/z-bahna-a-krve/lotjb/", "date_iso": "2026-03-17", "time": "19:30"}, {"raw": "17. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Made in EU", "url": "https://www.oneworld.cz/detail/16879"}], "buy": "https://goout.net/en/listky/made-in-eu/mqtjb/", "date_iso": "2026-03-17", "time": "20:00"}, {"raw": "17. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Lykke Post Partum", "url": "https://www.oneworld.cz/detail/16899"}], "buy": "https://goout.net/en/listky/lykke-post-partum/vstjb/", "date_iso": "2026-03-17", "time": "20:00"}, {"raw": "17. 03. 20:30", "venue": "ARCHA+ (Large Hall)", "address": "Na Poříčí 26, Praha 1", "films": [{"title": "White Gold: Elon Musk and the Race for Argentina's Lithium", "url": "https://www.oneworld.cz/detail/16850"}], "buy": "https://goout.net/en/listky/elon-musk-a-zavod-o-lithium/jotjb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Desert Passages", "url": "https://www.oneworld.cz/detail/16856"}], "buy": "https://goout.net/en/listky/poustni-reka/eptjb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "It Was Just an Accident", "url": "https://www.oneworld.cz/detail/16962"}], "buy": "https://goout.net/en/listky/drobna-nehoda/vytjb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Vojta’s Life: A New Episode", "url": "https://www.oneworld.cz/detail/16988"}], "buy": "https://goout.net/en/listky/vojtuv-zivot/hxtjb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "State of Firsts", "url": "https://www.oneworld.cz/detail/17000"}], "buy": "https://goout.net/en/listky/zeme-prvnich/uxtjb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Sunshine", "url": "https://www.oneworld.cz/detail/17020"}], "buy": "https://goout.net/en/listky/sunshine/hvtjb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "To the West, in Zapata", "url": "https://www.oneworld.cz/detail/17059"}], "buy": "https://goout.net/en/listky/na-zapad-do-zapaty/gbujb/", "date_iso": "2026-03-17", "time": "20:30"}, {"raw": "17. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Slave Island", "url": "https://www.oneworld.cz/detail/17036"}], "buy": "https://goout.net/en/listky/otrokarsky-raj/waujb/", "date_iso": "2026-03-17", "time": "21:00"}, {"raw": "12. 03. — 18. 03.", "venue": "", "address": "", "films": [{"title": "Under the Same Sky", "url": "https://www.oneworld.cz/filmy/58546/under-the-same-sky"}, {"title": "Another Place", "url": "https://www.oneworld.cz/filmy/58640/another-place"}, {"title": "The Sad Story of the Little Mouse Who Wanted to Become Somebody", "url": "https://www.oneworld.cz/filmy/59193/the-sad-story-of-the-little-mouse-who-wanted-to-become-somebody"}, {"title": "We Are Dead Animals", "url": "https://www.oneworld.cz/filmy/59656/we-are-dead-animals"}, {"title": "If You See a Cat", "url": "https://www.oneworld.cz/filmy/59183/if-you-see-a-cat"}, {"title": "8 Billion Selves", "url": "https://www.oneworld.cz/filmy/59680/8-billion-selves"}, {"title": "Revival Roadshow", "url": "https://www.oneworld.cz/filmy/59194/revival-roadshow"}, {"title": "Space for Action", "url": "https://www.oneworld.cz/filmy/58409/space-for-action"}], "buy": "https://www.oneworld.cz/film-package/59685", "date_iso": "2026-03-18", "time": ""}, {"raw": "18. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "IRKALLA: Dreams of Gilgamesh", "url": "https://www.oneworld.cz/detail/16896"}], "buy": "https://goout.net/en/listky/sen-o-gilgamesovi/ystjb/", "date_iso": "2026-03-18", "time": "15:00"}, {"raw": "18. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Queer as Punk", "url": "https://www.oneworld.cz/detail/16881"}], "buy": "https://goout.net/en/listky/queer-jak-punk/nqtjb/", "date_iso": "2026-03-18", "time": "17:00"}, {"raw": "18. 03. 17:15", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Traces", "url": "https://www.oneworld.cz/detail/16909"}], "buy": "https://goout.net/en/listky/po-stopach/cttjb/", "date_iso": "2026-03-18", "time": "17:15"}, {"raw": "18. 03. 17:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "Love Letters", "url": "https://www.oneworld.cz/detail/16963"}], "buy": "https://goout.net/en/listky/dukazy-lasky/uytjb/", "date_iso": "2026-03-18", "time": "17:30"}, {"raw": "18. 03. 17:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Kabul, Between Prayers", "url": "https://www.oneworld.cz/detail/16980"}], "buy": "https://goout.net/en/listky/kabul-mezi-modlitbami/jxtjb/", "date_iso": "2026-03-18", "time": "17:30"}, {"raw": "18. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Welded Together", "url": "https://www.oneworld.cz/detail/17023"}], "buy": "https://goout.net/en/listky/spolu-svareny/jvtjb/", "date_iso": "2026-03-18", "time": "17:30"}, {"raw": "18. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "Gunnar Goes God", "url": "https://www.oneworld.cz/detail/16858"}], "buy": "https://goout.net/en/listky/gunnar-jde-za-bohem/fptjb/", "date_iso": "2026-03-18", "time": "18:00"}, {"raw": "18. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Carmela and the Walkers", "url": "https://www.oneworld.cz/detail/16990"}], "buy": "https://goout.net/en/listky/carmela-a-ti-co-prochazi/txtjb/", "date_iso": "2026-03-18", "time": "18:00"}, {"raw": "18. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "The Encampments", "url": "https://www.oneworld.cz/detail/17056"}], "buy": "https://goout.net/en/listky/studentstvo-pro-gazu/hbujb/", "date_iso": "2026-03-18", "time": "18:00"}, {"raw": "18. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Elon Musk Unveiled - The Tesla Experiment", "url": "https://www.oneworld.cz/detail/17066"}], "buy": "https://goout.net/en/listky/elon-a-pokusni-kralici/tcujb/", "date_iso": "2026-03-18", "time": "18:00"}, {"raw": "18. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Searching for Satyrus", "url": "https://www.oneworld.cz/detail/17033"}], "buy": "https://goout.net/en/listky/patrani-po-satyrovi/kutjb/", "date_iso": "2026-03-18", "time": "18:30"}, {"raw": "18. 03. 19:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Marlee Matlin: Not Alone Anymore", "url": "https://www.oneworld.cz/detail/17079"}], "buy": "https://goout.net/en/listky/marlee-matlin-uz-nejsem-jedina/wbujb/", "date_iso": "2026-03-18", "time": "19:00"}, {"raw": "18. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "Dear Tomorrow", "url": "https://www.oneworld.cz/detail/16872"}], "buy": "https://www.oneworld.cz/daily-programme?day=2026-03-18&type=0&placeId=0&inflsId=0#", "date_iso": "2026-03-18", "time": "20:00"}, {"raw": "18. 03. 20:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Flood", "url": "https://www.oneworld.cz/detail/16892"}], "buy": "https://goout.net/en/listky/potopa/mttjb/", "date_iso": "2026-03-18", "time": "20:00"}, {"raw": "18. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "2000 Meters to Andriivka", "url": "https://www.oneworld.cz/detail/16851"}], "buy": "https://goout.net/en/listky/2000-metru-do-andrijivky/hptjb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 20:30", "venue": "Kino 35 - French Institute in Prague", "address": "Štěpánská 644/35, Praha 1", "films": [{"title": "The Woman Who Poked The Leopard", "url": "https://www.oneworld.cz/detail/16971"}], "buy": "https://goout.net/en/listky/zena-ktera-drazdila-leoparda/tytjb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 20:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "The Coriolis Effect", "url": "https://www.oneworld.cz/detail/16986"}], "buy": "https://goout.net/en/listky/oko-hurikanu/mxtjb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "A Free Daughter of Free Kyrgyzstan", "url": "https://www.oneworld.cz/detail/16989"}], "buy": "https://goout.net/en/listky/rebelska-raperka-z-kyrgyzstanu/rxtjb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "The Sandbox", "url": "https://www.oneworld.cz/detail/17022"}], "buy": "https://goout.net/en/listky/sandbox/kvtjb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Jaripeo", "url": "https://www.oneworld.cz/detail/17051"}], "buy": "https://goout.net/en/listky/queer-rodeo/ibujb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 20:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "The Voice of Hind Rajab", "url": "https://www.oneworld.cz/detail/17073"}], "buy": "https://goout.net/en/listky/hlas-hind-radzab/scujb/", "date_iso": "2026-03-18", "time": "20:30"}, {"raw": "18. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "AMOOSED: a moose odyssey", "url": "https://www.oneworld.cz/detail/17025"}], "buy": "https://goout.net/en/listky/amoosed-losi-odysea/lutjb/", "date_iso": "2026-03-18", "time": "21:00"}, {"raw": "19. 03. 15:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Homeless Blues", "url": "https://www.oneworld.cz/detail/16893"}], "buy": "https://goout.net/en/listky/homeless-blues/nttjb/", "date_iso": "2026-03-19", "time": "15:00"}, {"raw": "19. 03. 17:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "80 Angry Journalists", "url": "https://www.oneworld.cz/detail/16869"}], "buy": "https://goout.net/en/listky/80-rozlicenych-novinaru/pqtjb/", "date_iso": "2026-03-19", "time": "17:00"}, {"raw": "19. 03. 17:00", "venue": "Evald", "address": "Národní 28, Praha 1", "films": [{"title": "Desert Passages", "url": "https://www.oneworld.cz/detail/16890"}], "buy": "https://goout.net/en/listky/poustni-reka/ottjb/", "date_iso": "2026-03-19", "time": "17:00"}, {"raw": "19. 03. 17:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "A Fox Under a Pink Moon", "url": "https://www.oneworld.cz/detail/17006"}], "buy": "https://goout.net/en/listky/liska-a-ruzova-luna/lvtjb/", "date_iso": "2026-03-19", "time": "17:30"}, {"raw": "19. 03. 18:00", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "32 Meters", "url": "https://www.oneworld.cz/detail/16852"}], "buy": "https://goout.net/en/listky/32-metru/iptjb/", "date_iso": "2026-03-19", "time": "18:00"}, {"raw": "19. 03. 18:00", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "My Word Against Mine", "url": "https://www.oneworld.cz/detail/16995"}], "buy": "https://goout.net/en/listky/moje-slovo-proti-memu/qxtjb/", "date_iso": "2026-03-19", "time": "18:00"}, {"raw": "19. 03. 18:00", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "I, Poppy", "url": "https://www.oneworld.cz/detail/17049"}], "buy": "https://goout.net/en/listky/me-makove-ja/jbujb/", "date_iso": "2026-03-19", "time": "18:00"}, {"raw": "19. 03. 18:00", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Cutting Through Rocks", "url": "https://www.oneworld.cz/detail/17065"}], "buy": "https://goout.net/en/listky/projet-pres-prekazky/rcujb/", "date_iso": "2026-03-19", "time": "18:00"}, {"raw": "19. 03. 18:00", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "The Shadow Scholars", "url": "https://www.oneworld.cz/detail/17087"}], "buy": "https://goout.net/en/listky/stinova-akademie/xbujb/", "date_iso": "2026-03-19", "time": "18:00"}, {"raw": "19. 03. 18:30", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "Fighter", "url": "https://www.oneworld.cz/detail/17027"}], "buy": "https://goout.net/en/listky/zapasnik/mutjb/", "date_iso": "2026-03-19", "time": "18:30"}, {"raw": "19. 03. 20:00", "venue": "Edison Filmhub", "address": "Jeruzalémská 1321/2, Praha 1", "films": [{"title": "The End of Quiet", "url": "https://www.oneworld.cz/detail/16883"}], "buy": "https://goout.net/en/listky/na-konci-ticha/rqtjb/", "date_iso": "2026-03-19", "time": "20:00"}, {"raw": "19. 03. 20:30", "venue": "Bio Oko", "address": "Františka Křížka 15, Praha 7", "films": [{"title": "How to Be Normal and the Oddness of the Other World", "url": "https://www.oneworld.cz/detail/16859"}], "buy": "https://goout.net/en/listky/jak-byt-normalni-a-vsechny-podivnosti-sveta/jptjb/", "date_iso": "2026-03-19", "time": "20:30"}, {"raw": "19. 03. 20:30", "venue": "Kino Pilotů", "address": "Donská 19, Praha 10", "films": [{"title": "Driving Europe", "url": "https://www.oneworld.cz/detail/16992"}], "buy": "https://goout.net/en/listky/stavka-kamionu/pxtjb/", "date_iso": "2026-03-19", "time": "20:30"}, {"raw": "19. 03. 20:30", "venue": "Ponrepo Cinema", "address": "Bartolomějská 11, Praha 1", "films": [{"title": "Lowland Kids", "url": "https://www.oneworld.cz/detail/17009"}], "buy": "https://goout.net/en/listky/deti-z-mizejiciho-ostrova/mvtjb/", "date_iso": "2026-03-19", "time": "20:30"}, {"raw": "19. 03. 20:30", "venue": "Světozor Cinema – Large Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "The Sandbox", "url": "https://www.oneworld.cz/detail/17058"}], "buy": "https://goout.net/en/listky/sandbox/kbujb/", "date_iso": "2026-03-19", "time": "20:30"}, {"raw": "19. 03. 20:30", "venue": "Prague Municipal Library – Small Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "River Dreams", "url": "https://www.oneworld.cz/detail/17072"}], "buy": "https://goout.net/en/listky/ricni-sneni/qcujb/", "date_iso": "2026-03-19", "time": "20:30"}, {"raw": "19. 03. 20:30", "venue": "Prague Municipal Library – Large Hall", "address": "Mariánské nám. 1, Praha 1", "films": [{"title": "Put Your Soul on Your Hand and Walk", "url": "https://www.oneworld.cz/detail/17083"}], "buy": "https://goout.net/en/listky/jit-s-dusi-na-dlani/bcujb/", "date_iso": "2026-03-19", "time": "20:30"}, {"raw": "19. 03. 21:00", "venue": "Světozor Cinema – Small Hall", "address": "Vodičkova 791/41, Praha 1", "films": [{"title": "I Follow Rivers", "url": "https://www.oneworld.cz/detail/17029"}], "buy": "https://goout.net/en/listky/reky-lasky-proud/nutjb/", "date_iso": "2026-03-19", "time": "21:00"}, {"raw": "19. 03. 21:30", "venue": "Lucerna Cinema – Large Hall", "address": "Vodičkova 704/36, Praha 1", "films": [{"title": "Awarded Film: International Competition", "url": "https://www.oneworld.cz/detail/16975"}], "buy": "https://goout.net/en/listky/vitezny-film-mezinarodni-souteze/toujb/", "date_iso": "2026-03-19", "time": "21:30"}];
 
-const typeEmoji = {
-  'Full-length documentary': '🎥',
-  'Feature film': '🎞️',
-  'Short documentary': '📽️',
-  'Virtual reality': '🥽',
-  'Special': '⭐',
+// Venue colors
+const VENUES = [
+  "Lucerna Cinema – Large Hall",
+  "Světozor Cinema – Large Hall","Světozor Cinema – Small Hall",
+  "Prague Municipal Library – Large Hall","Prague Municipal Library – Small Hall",
+  "Edison Filmhub","Bio Oko","Ponrepo Cinema","Kino Pilotů","Evald",
+  "Kino 35 - French Institute in Prague","Gallery 35 - French Institute in Prague",
+  "ARCHA+ (Large Hall)","ARCHA+ (Small Hall)",
+  "The Lounge at Café Lucerna (evening podcast stage)"
+];
+const VENUE_COLORS = [
+  "#e63946","#2a9d8f","#1a8fe3","#e9c46a","#f4a261",
+  "#8338ec","#06d6a0","#ef476f","#ffd166","#118ab2",
+  "#c77dff","#ff9f1c","#48cae4","#b5179e","#95d5b2"
+];
+const venueColor = v => {
+  const i = VENUES.indexOf(v);
+  return i >= 0 ? VENUE_COLORS[i] : "#666";
 };
 
-let activeTag = '';
+// Preprocess screenings: map film title → screenings
+const DAYS = ["2026-03-11","2026-03-12","2026-03-13","2026-03-14","2026-03-15","2026-03-16","2026-03-17","2026-03-18","2026-03-19"];
+const DAY_LABELS = ["Wed 11/3","Thu 12/3","Fri 13/3","Sat 14/3","Sun 15/3","Mon 16/3","Tue 17/3","Wed 18/3","Thu 19/3"];
 
-// Build tag strip from types
-const tagStrip = document.getElementById('tagStrip');
-const allTypes = [...new Set(FILMS.map(f => f.type))].filter(Boolean).sort();
-allTypes.forEach(type => {
-  const btn = document.createElement('button');
-  btn.className = 'filter-tag';
-  btn.textContent = (typeEmoji[type] || '🎬') + ' ' + type;
-  btn.dataset.type = type;
-  btn.onclick = () => {
-    activeTag = activeTag === type ? '' : type;
-    document.querySelectorAll('.filter-tag').forEach(b => b.classList.toggle('active', b.dataset.type === activeTag));
-    document.getElementById('typeFilter').value = activeTag;
-    render();
-  };
-  tagStrip.appendChild(btn);
+// Build film→screenings map
+const filmScreenings = {};
+SCREENINGS_RAW.forEach(s => {
+  if (!s.films) return;
+  s.films.forEach(f => {
+    const title = f.title;
+    if (!filmScreenings[title]) filmScreenings[title] = [];
+    filmScreenings[title].push({
+      venue: s.venue, address: s.address,
+      date: s.date_iso, time: s.time,
+      buy: s.buy
+    });
+  });
 });
 
-function render() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const type = document.getElementById('typeFilter').value || activeTag;
-  
-  const filtered = FILMS.filter(f => {
-    const matchQ = !q || f.title.toLowerCase().includes(q) || (f.desc||'').toLowerCase().includes(q);
-    const matchType = !type || f.type === type;
-    return matchQ && matchType;
+// Attach screenings to films
+FILMS.forEach(film => {
+  film.screenings = filmScreenings[film.title] || [];
+});
+
+// Populate venue filter
+const venueSelect = document.getElementById("venueFilter");
+VENUES.forEach(v => {
+  const opt = document.createElement("option");
+  opt.value = v; opt.textContent = v;
+  venueSelect.appendChild(opt);
+});
+
+// Venue legend
+const legend = document.getElementById("venueLegend");
+VENUES.forEach(v => {
+  const el = document.createElement("div");
+  el.className = "legend-item";
+  el.innerHTML = `<div class="legend-dot" style="background:${venueColor(v)}"></div>${v}`;
+  legend.appendChild(el);
+});
+
+const typeEmoji = {
+  "Full-length documentary":"🎥","Feature film":"🎞️",
+  "Short documentary":"📽️","Virtual reality":"🥽","Special":"⭐"
+};
+
+let currentView = "list";
+function setView(v) {
+  currentView = v;
+  document.getElementById("listView").style.display = v==="list" ? "" : "none";
+  document.getElementById("calView").style.display = v==="calendar" ? "" : "none";
+  document.getElementById("btnList").classList.toggle("active", v==="list");
+  document.getElementById("btnCal").classList.toggle("active", v==="calendar");
+  render();
+}
+
+function getFiltered() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const type = document.getElementById("typeFilter").value;
+  const venue = document.getElementById("venueFilter").value;
+  return FILMS.filter(f => {
+    const mQ = !q || f.title.toLowerCase().includes(q) || (f.desc||"").toLowerCase().includes(q);
+    const mT = !type || f.type === type;
+    const mV = !venue || (f.screenings||[]).some(s => s.venue === venue);
+    return mQ && mT && mV;
   });
+}
 
-  document.getElementById('count').textContent = filtered.length + ' of ' + FILMS.length + ' films';
+function render() {
+  const filtered = getFiltered();
+  document.getElementById("count").textContent = filtered.length + " / " + FILMS.length + " films";
+  if (currentView === "list") renderList(filtered);
+  else renderCalendar(filtered);
+}
 
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-
-  if (filtered.length === 0) {
-    grid.innerHTML = '<div class="empty">No films match your search 🎬</div>';
-    return;
-  }
-
-  filtered.forEach((film, i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
+function renderList(filtered) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  if (!filtered.length) { grid.innerHTML = "<div class=\"empty\">No films match 🎬</div>"; return; }
+  filtered.forEach(film => {
+    const card = document.createElement("div");
+    card.className = "card";
     card.onclick = () => openModal(film);
-
-    const imgHtml = film.img
-      ? `<img class="card-img" src="${film.img}" alt="${film.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      : '';
-    const placeholderHtml = `<div class="card-img-placeholder" style="${film.img ? 'display:none' : ''}">${typeEmoji[film.type] || '🎬'}</div>`;
-
+    const chips = (film.screenings||[]).slice(0,4).map(s =>
+      `<span class="screening-chip" style="background:${venueColor(s.venue)}">${s.time || ""} ${(s.venue||"").split("–")[0].split("(")[0].trim().slice(0,15)}</span>`
+    ).join("");
     card.innerHTML = `
-      ${imgHtml}
-      ${placeholderHtml}
+      ${film.img ? `<img class="card-img" src="${film.img}" alt="${film.title}" loading="lazy" onerror="this.style.display='none'">` : `<div class="card-ph">${typeEmoji[film.type]||"🎬"}</div>`}
       <div class="card-body">
-        <div class="card-type">${film.type || ''}</div>
+        <div class="card-type">${film.type||""}</div>
         <div class="card-title">${film.title}</div>
-        <div class="card-desc">${film.desc || 'No description available.'}</div>
+        <div class="card-desc">${film.desc||"No description."}</div>
+        ${chips ? `<div class="card-screenings">${chips}</div>` : ""}
         <div class="card-footer">
-          <span class="type-badge">${typeEmoji[film.type] || '🎬'}</span>
+          <span style="font-size:.72rem;color:var(--muted)">${film.screenings.length} screening${film.screenings.length!==1?"s":""}</span>
           <a class="visit-link" href="${film.link}" target="_blank" onclick="event.stopPropagation()">oneworld.cz →</a>
         </div>
-      </div>
-    `;
+      </div>`;
     grid.appendChild(card);
   });
 }
 
+function renderCalendar(filtered) {
+  const table = document.getElementById("calTable");
+  table.innerHTML = "";
+  const filteredTitles = new Set(filtered.map(f => f.title));
+
+  // Header row
+  const hr = document.createElement("tr");
+  hr.innerHTML = `<th style="min-width:120px">Venue</th>` + DAY_LABELS.map(d => `<th>${d}</th>`).join("");
+  table.appendChild(hr);
+
+  // Build venue→day→screenings map
+  const venueMap = {};
+  SCREENINGS_RAW.forEach(s => {
+    if (!s.venue || !s.date_iso) return;
+    const filmsInScreen = (s.films||[]).filter(f => filteredTitles.has(f.title));
+    if (!filmsInScreen.length) return;
+    if (!venueMap[s.venue]) venueMap[s.venue] = {};
+    if (!venueMap[s.venue][s.date_iso]) venueMap[s.venue][s.date_iso] = [];
+    venueMap[s.venue][s.date_iso].push({...s, films: filmsInScreen});
+  });
+
+  const activeVenues = VENUES.filter(v => venueMap[v]);
+  if (!activeVenues.length) {
+    table.innerHTML = `<tr><td colspan="10" style="padding:2rem;text-align:center;color:var(--muted)">No screenings match</td></tr>`;
+    return;
+  }
+
+  activeVenues.forEach(venue => {
+    const row = document.createElement("tr");
+    const color = venueColor(venue);
+    const shortVenue = venue.split("–")[0].split("(")[0].trim();
+    row.innerHTML = `<td style="border:1px solid var(--border);padding:.4rem .6rem;font-size:.75rem;font-weight:700;white-space:nowrap;vertical-align:middle">
+      <span class="cal-venue-label" style="background:${color}22;color:${color}">${shortVenue}</span></td>`;
+    DAYS.forEach(day => {
+      const td = document.createElement("td");
+      const cell = document.createElement("div");
+      cell.className = "cal-cell";
+      const dayScreenings = (venueMap[venue]||{})[day] || [];
+      dayScreenings.forEach(s => {
+        s.films.forEach(filmRef => {
+          const film = FILMS.find(f => f.title === filmRef.title);
+          if (!film) return;
+          const btn = document.createElement("button");
+          btn.className = "cal-event";
+          btn.style.background = color + "33";
+          btn.style.borderLeft = `3px solid ${color}`;
+          btn.innerHTML = `<div class="cal-event-title">${film.title.length > 30 ? film.title.slice(0,28)+"…" : film.title}</div><div class="cal-event-time">${s.time||""}</div>`;
+          btn.onclick = () => openModal(film);
+          cell.appendChild(btn);
+        });
+      });
+      td.appendChild(cell);
+      row.appendChild(td);
+    });
+    table.appendChild(row);
+  });
+}
+
 function openModal(film) {
-  document.getElementById('modalImg').src = film.img || '';
-  document.getElementById('modalImg').style.display = film.img ? 'block' : 'none';
-  document.getElementById('modalType').textContent = film.type || '';
-  document.getElementById('modalTitle').textContent = film.title;
-  document.getElementById('modalDesc').textContent = film.desc || 'No description available.';
-  document.getElementById('modalLink').href = film.link;
-  document.getElementById('modalBackdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.getElementById("modalImg").src = film.img||"";
+  document.getElementById("modalImg").style.display = film.img ? "block" : "none";
+  document.getElementById("modalType").textContent = film.type||"";
+  document.getElementById("modalTitle").textContent = film.title;
+  document.getElementById("modalDesc").textContent = film.desc||"No description.";
+  document.getElementById("modalLink").href = film.link;
+
+  const screenDiv = document.getElementById("modalScreenings");
+  screenDiv.innerHTML = "";
+  const screenTitle = document.getElementById("modalScreenTitle");
+  if (film.screenings && film.screenings.length) {
+    screenTitle.style.display = "";
+    film.screenings.forEach(s => {
+      const a = document.createElement("a");
+      a.className = "modal-screening";
+      a.href = s.buy||film.link;
+      a.target = "_blank";
+      a.style.background = venueColor(s.venue)+"22";
+      a.style.borderLeft = `3px solid ${venueColor(s.venue)}`;
+      const day = s.date ? new Date(s.date).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}) : "";
+      a.innerHTML = `<div class="modal-screening-venue">${s.venue||"VR/Immersive"}</div>
+        <div class="modal-screening-when">${day} ${s.time||""}</div>
+        ${s.buy && s.buy.includes("goout") ? '<div class="modal-screening-buy">Buy tickets</div>' : ""}`;
+      screenDiv.appendChild(a);
+    });
+  } else { screenTitle.style.display = "none"; }
+
+  document.getElementById("modalBackdrop").classList.add("open");
+  document.body.style.overflow = "hidden";
 }
 
-function closeModal(event) {
-  if (event && event.target !== document.getElementById('modalBackdrop')) return;
-  document.getElementById('modalBackdrop').classList.remove('open');
-  document.body.style.overflow = '';
+function closeModal(e) {
+  if (e && e.target !== document.getElementById("modalBackdrop")) return;
+  document.getElementById("modalBackdrop").classList.remove("open");
+  document.body.style.overflow = "";
 }
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
 
 render();
 </script>
