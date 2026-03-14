@@ -17,17 +17,20 @@
     .header-top { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.7rem; }
     .logo-main { font-size:1.3rem; font-weight:800; color:var(--accent); white-space:nowrap; }
     .logo-sub { font-size:.72rem; color:var(--muted); }
-    .filters { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+    .filters { display:flex; flex-direction:column; gap:.5rem; }
+    .filter-row { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
     .filters input, .filters select {
       background:var(--card); border:1px solid var(--border); color:var(--text);
       padding:.38rem .7rem; border-radius:7px; font-size:.83rem; outline:none;
     }
-    .filters input { min-width:180px; flex:1; }
+    .filters input { width:100%; }
     .filters input:focus, .filters select:focus { border-color:var(--accent2); }
-    .count { color:var(--muted); font-size:.8rem; margin-left:auto; white-space:nowrap; }
-    .view-toggle { display:flex; gap:.3rem; margin-left:auto; }
+    .count { color:var(--muted); font-size:.8rem; white-space:nowrap; margin-left:auto; }
+    .view-toggle { display:flex; gap:.3rem; }
     .view-btn { padding:.35rem .8rem; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--muted); cursor:pointer; font-size:.8rem; font-weight:600; }
     .view-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .btn-random { padding:.35rem .9rem; border-radius:6px; border:1px solid #f4a261; background:transparent; color:#f4a261; cursor:pointer; font-size:.8rem; font-weight:700; transition:background .15s,color .15s; }
+    .btn-random:hover { background:#f4a261; color:#000; }
 
     /* ── List view ── */
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1rem; padding:1.2rem; }
@@ -95,24 +98,27 @@
       <div class="logo-main">🎬 One World 2026</div>
       <div class="logo-sub">Human Rights Film Festival · 11–19 March · Prague</div>
     </div>
-    <div class="view-toggle">
-      <button class="view-btn active" id="btnList" onclick="setView('list')">☰ List</button>
-      <button class="view-btn" id="btnCal" onclick="setView('calendar')">📅 Calendar</button>
-    </div>
   </div>
   <div class="filters">
     <input type="text" id="search" placeholder="Search films…" oninput="render()">
-    <select id="typeFilter" onchange="render()">
-      <option value="">All types</option>
-      <option value="Full-length documentary">Documentary</option>
-      <option value="Feature film">Feature film</option>
-      <option value="Short documentary">Short</option>
-      <option value="Virtual reality">VR</option>
-    </select>
-    <select id="venueFilter" onchange="render()">
-      <option value="">All venues</option>
-    </select>
-    <span class="count" id="count"></span>
+    <div class="filter-row">
+      <select id="typeFilter" onchange="render()">
+        <option value="">All types</option>
+        <option value="Full-length documentary">Documentary</option>
+        <option value="Feature film">Feature film</option>
+        <option value="Short documentary">Short</option>
+        <option value="Virtual reality">VR</option>
+      </select>
+      <select id="venueFilter" onchange="render()">
+        <option value="">All venues</option>
+      </select>
+      <button class="btn-random" onclick="openRandom()">🎲 Random</button>
+      <span class="count" id="count"></span>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnList" onclick="setView('list')">☰ List</button>
+        <button class="view-btn" id="btnCal" onclick="setView('calendar')">📅 Calendar</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -369,6 +375,13 @@ function closeModal(e) {
   document.body.style.overflow = "";
 }
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+
+function openRandom() {
+  const filtered = getFiltered();
+  if (!filtered.length) return;
+  const film = filtered[Math.floor(Math.random() * filtered.length)];
+  openModal(film);
+}
 
 render();
 </script>
