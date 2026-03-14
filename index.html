@@ -248,8 +248,9 @@ function setView(v){
   document.getElementById("listView").style.display=v==="list"?"":"none";
   document.getElementById("calView").style.display=v==="calendar"?"":"none";
   document.getElementById("mapView").style.display=v==="map"?"":"none";
+  const btnIds={list:"btnList",calendar:"btnCal",map:"btnMap"};
   ["btnList","btnCal","btnMap"].forEach(id=>document.getElementById(id).classList.remove("active"));
-  document.getElementById("btn"+v.charAt(0).toUpperCase()+v.slice(1)).classList.add("active");
+  document.getElementById(btnIds[v]).classList.add("active");
   render();
   if(v==="map"&&!leafletMap){
     setTimeout(initMap,50);
