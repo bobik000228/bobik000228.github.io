@@ -245,9 +245,9 @@ let leafletMap=null;
 
 function setView(v){
   currentView=v;
-  document.getElementById("listView").style.display=v==="list"?"":"none";
-  document.getElementById("calView").style.display=v==="calendar"?"":"none";
-  document.getElementById("mapView").style.display=v==="map"?"":"none";
+  document.getElementById("listView").style.display=v==="list"?"block":"none";
+  document.getElementById("calView").style.display=v==="calendar"?"block":"none";
+  document.getElementById("mapView").style.display=v==="map"?"block":"none";
   const btnIds={list:"btnList",calendar:"btnCal",map:"btnMap"};
   ["btnList","btnCal","btnMap"].forEach(id=>document.getElementById(id).classList.remove("active"));
   document.getElementById(btnIds[v]).classList.add("active");
